@@ -9,234 +9,296 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #4a6580;
             --accent-color: #3498db;
-            --light-color: #f8f9fa;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
+            --light-color: #ecf0f1;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
         }
         
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 80px;
         }
+        
         .header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 20px 0;
+            padding: 25px 0;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.05"><text x="50%" y="50%" font-size="12" text-anchor="middle" fill="white">OATI</text></svg>');
+            z-index: 0;
+        }
+        
         .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
             border: none;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        
         .card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
         }
+        
         .card-header {
-            background-color: var(--secondary-color);
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
             color: white;
-            border-radius: 10px 10px 0 0 !important;
+            border-radius: 12px 12px 0 0 !important;
             font-weight: bold;
+            padding: 15px 20px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
         }
+        
         .form-section {
             margin-bottom: 25px;
-            padding: 15px;
+            padding: 20px;
             background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
         }
+        
         .btn-primary {
-            background-color: var(--primary-color);
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
             border: none;
-        }
-        .btn-primary:hover {
-            background-color: #1a2530;
-        }
-        .btn-success {
-            background-color: var(--success-color);
-            border: none;
-        }
-        .btn-success:hover {
-            background-color: #218838;
-        }
-        .required-field::after {
-            content: " *";
-            color: red;
-        }
-        .activity-table {
-            font-size: 0.9rem;
-        }
-        .stats-box {
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #e9ecef;
-            margin-bottom: 20px;
+            padding: 10px 20px;
+            font-weight: 600;
             transition: all 0.3s ease;
         }
-        .stats-box:hover {
-            background-color: #dfe3e6;
-            transform: scale(1.02);
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(44, 62, 80, 0.2);
         }
+        
+        .btn-success {
+            background: linear-gradient(to right, var(--success-color), #2ecc71);
+            border: none;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+        
+        .activity-table {
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        
+        .activity-table th {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .stats-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--light-color), #dfe6e9);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-box:hover {
+            transform: translateY(-3px);
+        }
+        
         .stats-number {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: bold;
             color: var(--primary-color);
+            margin: 10px 0;
         }
+        
         .action-buttons {
             white-space: nowrap;
         }
+        
+        .action-buttons .btn {
+            margin: 0 3px;
+            padding: 5px 10px;
+        }
+        
         .modal-content {
-            border-radius: 10px;
+            border-radius: 12px;
+            overflow: hidden;
         }
+        
         .modal-header {
-            background-color: var(--secondary-color);
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
             color: white;
-            border-radius: 10px 10px 0 0;
+            border-radius: 12px 12px 0 0;
+            padding: 15px 20px;
         }
+        
         .checkbox-cell {
             width: 40px;
         }
+        
         .export-options {
             background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
         }
+        
         .oatilogo {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
+        
         .storage-info {
-            background-color: #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, var(--light-color), #dfe6e9);
+            padding: 20px;
+            border-radius: 10px;
             margin-top: 20px;
-            font-size: 0.9rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+        
         .connection-status {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            padding: 10px 15px;
-            border-radius: 5px;
+            padding: 12px 18px;
+            border-radius: 8px;
             font-weight: bold;
             z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            cursor: pointer;
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        .connection-status:hover {
-            transform: scale(1.05);
-        }
+        
         .online {
             background-color: var(--success-color);
             color: white;
         }
+        
         .offline {
-            background-color: #6c757d;
+            background-color: var(--warning-color);
             color: white;
         }
+        
         .sync-options {
-            background-color: #d4edda;
-            padding: 15px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            padding: 20px;
+            border-radius: 10px;
             margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+        
         .feature-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            background: linear-gradient(to right, var(--accent-color), #2980b9);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
         }
+        
+        @media (max-width: 768px) {
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                margin-top: 10px;
+            }
+            
+            .stats-box {
+                margin-bottom: 15px;
+            }
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* Mejoras para el formulario */
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 2px solid #e1e5eb;
+            transition: all 0.3s ease;
+        }
+        
         .form-control:focus, .form-select:focus {
             border-color: var(--accent-color);
             box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
         }
-        .filter-section {
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        
+        /* Mejoras para la tabla */
+        .table-hover tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.1);
         }
-        .chart-container {
-            position: relative;
-            height: 250px;
-            margin-bottom: 20px;
+        
+        /* Badges mejorados */
+        .badge {
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: 600;
         }
-        .nav-tabs .nav-link {
-            color: var(--primary-color);
+        
+        .bg-success {
+            background: linear-gradient(to right, var(--success-color), #2ecc71) !important;
         }
-        .nav-tabs .nav-link.active {
-            font-weight: bold;
-            color: var(--primary-color);
-            border-bottom: 3px solid var(--accent-color);
+        
+        .bg-primary {
+            background: linear-gradient(to right, var(--accent-color), #2980b9) !important;
         }
-        .progress {
-            height: 8px;
-            margin-bottom: 10px;
+        
+        .bg-warning {
+            background: linear-gradient(to right, var(--warning-color), #f1c40f) !important;
         }
-        .storage-modal-content {
-            border-radius: 15px;
-            overflow: hidden;
-        }
-        .storage-details {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-        .storage-progress {
-            height: 20px;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
-        .storage-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-        .stat-item {
-            text-align: center;
-            padding: 10px;
-            background-color: white;
-            border-radius: 8px;
-            flex: 1;
-            margin: 0 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        @media (max-width: 768px) {
-            .action-buttons {
-                white-space: normal;
-            }
-            .action-buttons .btn {
-                margin-bottom: 5px;
-            }
+        
+        .bg-danger {
+            background: linear-gradient(to right, var(--danger-color), #c0392b) !important;
         }
     </style>
 </head>
 <body>
-    <div class="toast-container"></div>
-
     <div class="header text-center">
         <div class="oatilogo">
             <i class="fas fa-laptop-code"></i>
@@ -246,576 +308,306 @@
     </div>
 
     <div class="container">
-        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="true">
-                    <i class="fas fa-plus-circle me-1"></i>Registrar Actividad
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities" type="button" role="tab" aria-controls="activities" aria-selected="false">
-                    <i class="fas fa-table me-1"></i>Actividades
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">
-                    <i class="fas fa-chart-bar me-1"></i>Estadísticas
-                </button>
-            </li>
-        </ul>
-
-        <div class="tab-content" id="mainTabsContent">
-            <div class="tab-pane fade show active" id="register" role="tabpanel" aria-labelledby="register-tab">
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <span><i class="fas fa-plus-circle me-2"></i>Nuevo Registro de Actividad</span>
-                                <span class="feature-badge badge bg-success">Local</span>
-                            </div>
-                            <div class="card-body">
-                                <form id="activityForm">
-                                    <input type="hidden" id="editId" value="">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-section">
-                                                <h5><i class="fas fa-tasks me-2"></i>Información de la Actividad</h5>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="categoria" class="form-label required-field">Categoría</label>
-                                                    <select class="form-select" id="categoria" required>
-                                                        <option value="">Seleccione una categoría</option>
-                                                        <option value="Mantenimiento">Mantenimiento</option>
-                                                        <option value="Reparación">Reparación</option>
-                                                        <option value="Instalación">Instalación</option>
-                                                        <option value="Soporte">Soporte Técnico</option>
-                                                        <option value="Otro">Otro</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Por favor seleccione una categoría</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="trabajoRealizado" class="form-label required-field">Trabajo Realizado</label>
-                                                    <select class="form-select" id="trabajoRealizado" required>
-                                                        <option value="">Seleccione el trabajo realizado</option>
-                                                        <option value="ACTUALIZACIÓN DE ANTIVIRUS">ACTUALIZACIÓN DE ANTIVIRUS</option>
-                                                        <option value="ADECUACION DE APLICACIÓN, PARA EL ACCESO DEL FUNCIONARIO A LA MISMA">ADECUACION DE APLICACIÓN, PARA EL ACCESO DEL FUNCIONARIO A LA MISMA</option>
-                                                        <option value="ANALISIS DE COMPUTADOR CON DR. WEB ANTIVIRUS">ANALISIS DE COMPUTADOR CON DR. WEB ANTIVIRUS</option>
-                                                        <option value="ANALISIS DE COMPUTADOR CON KASPERSKY ANTIVIRUS">ANALISIS DE COMPUTADOR CON KASPERSKY ANTIVIRUS</option>
-                                                        <option value="ANALISIS DE DISCO DURO DE COMPUTADOR CON HDD REGENERADOR">ANALISIS DE DISCO DURO DE COMPUTADOR CON HDD REGENERADOR</option>
-                                                        <option value="ANALISIS DE DISCO DURO DE COMPUTADOR CON VICTORIA RESCUE">ANALISIS DE DISCO DURO DE COMPUTADOR CON VICTORIA RESCUE</option>
-                                                        <option value="CENTRAL TELEFONICA">CENTRAL TELEFONICA</option>
-                                                        <option value="CONFIGURACION DE FECHA Y HORA">CONFIGURACION DE FECHA Y HORA</option>
-                                                        <option value="CONFIGURACION DE SISTEMA GISA">CONFIGURACION DE SISTEMA GISA</option>
-                                                        <option value="CONFIGURACION DE TELEFONO PARA CONEXIÓN WIFI">CONFIGURACION DE TELEFONO PARA CONEXIÓN WIFI</option>
-                                                        <option value="CREACCION DE CARPETA COMPARTIDA">CREACCION DE CARPETA COMPARTIDA</option>
-                                                        <option value="CREACCION DE CUENTA PARA EN ACCESO AL SISTEMA DE BIENES PUBLICOS">CREACCION DE CUENTA PARA EN ACCESO AL SISTEMA DE BIENES PUBLICOS</option>
-                                                        <option value="CREACION DE CORREO ELECTRONICO">CREACION DE CORREO ELECTRONICO</option>
-                                                        <option value="CREACION DE CUENTA DE ACCESO A SISTEMA DE BIENES PUBLICOS">CREACION DE CUENTA DE ACCESO A SISTEMA DE BIENES PUBLICOS</option>
-                                                        <option value="CREACION DE CUENTA DE ACCESO A SISTEMA PROMANAGER">CREACION DE CUENTA DE ACCESO A SISTEMA PROMANAGER</option>
-                                                        <option value="CREACION DE CUENTA DE USUARIO DE LA RED MAGISTRATURA">CREACION DE CUENTA DE USUARIO DE LA RED MAGISTRATURA</option>
-                                                        <option value="CREACION EDITOR DE SENTENCIAS PAGINA TSJ">CREACION EDITOR DE SENTENCIAS PAGINA TSJ</option>
-                                                        <option value="DESBLOQUEO DE CUENTA DE USUARIO DE LA RED MAGISTRATURA">DESBLOQUEO DE CUENTA DE USUARIO DE LA RED MAGISTRATURA</option>
-                                                        <option value="DESCONEXION DE EQUIPO DE COMPUTACION DE LA RED MAGISTRATURA">DESCONEXION DE EQUIPO DE COMPUTACION DE LA RED MAGISTRATURA</option>
-                                                        <option value="DESHABILITAR CUENTA DE ACCESO A INTERNET">DESHABILITAR CUENTA DE ACCESO A INTERNET</option>
-                                                        <option value="DESHABILITAR CUENTA DE EDITOR DE TEXTO TSJ">DESHABILITAR CUENTA DE EDITOR DE TEXTO TSJ</option>
-                                                        <option value="DESHABILITAR CUENTA DE RED MAGISTRATURA">DESHABILitAR CUENTA DE RED MAGISTRATURA</option>
-                                                        <option value="ELABORACION DE PROYECTOS">ELABORACION DE PROYECTOS</option>
-                                                        <option value="EVENTOS / INSTALACION DE EQUIPOS AUDIOVISUALES">EVENTOS / INSTALACION DE EQUIPOS AUDIOVISUALES</option>
-                                                        <option value="FORMACION AL USUARIO">FORMACION AL USUARIO</option>
-                                                        <option value="HABILITAR ACCESO A CARPETA COMPARTIDA">HABILITAR ACCESO A CARPETA COMPARTIDA</option>
-                                                        <option value="HABILITAR CUENTA DE ACCESO A INTERNET">HABILITAR CUENTA DE ACCESO A INTERNET</option>
-                                                        <option value="HABILITAR CUENTA DE RED MAGISTRATURA">HABILITAR CUENTA DE RED MAGISTRATURA</option>
-                                                        <option value="HABILITAR CUENTAS DE USUARIO PARA EL ACCESO AL SISTEMA DE BIENES PUBLICOS">HABILITAR CUENTAS DE USUARIO PARA EL ACCESO AL SISTEMA DE BIENES PUBLICOS</option>
-                                                        <option value="HABILITAR USUARIO PARA EL ACCESO AL SISTEMA GISA REPORTES">HABILITAR USUARIO PARA EL ACCESO AL SISTEMA GISA REPORTES</option>
-                                                        <option value="INCORPORACION DE EQUIPO A MAGISTRATURA">INCORPORACION DE EQUIPO A MAGISTRATURA</option>
-                                                        <option value="INSTALACION BATERIA CR032">INSTALACION BATERIA CR032</option>
-                                                        <option value="INSTALACION CABLEADO DE RED">INSTALACION CABLEADO DE RED</option>
-                                                        <option value="INSTALACION CABLEADO TELEFONICO">INSTALACION CABLEADO TELEFONICO</option>
-                                                        <option value="INSTALACION CAMARA DE SEGURIDAD">INSTALACION CAMARA DE SEGURIDAD</option>
-                                                        <option value="INSTALACION DE ANTENAS INALAMBRICAS / ROUTER / INTERCONEXION DE SEDES">INSTALACION DE ANTENAS INALAMBRICAS / ROUTER / INTERCONEXION DE SEDES</option>
-                                                        <option value="INSTALACION DE APLICACIONES">INSTALACION DE APLICACIONES</option>
-                                                        <option value="INSTALACION DE CAMARAS DE SEGURIDAD">INSTALACION DE CAMARAS DE SEGURIDAD</option>
-                                                        <option value="INSTALACION DE CENTRAL TELEFONICA">INSTALACION DE CENTRAL TELEFONICA</option>
-                                                        <option value="INSTALACION DE ESCANER">INSTALACION DE ESCANER</option>
-                                                        <option value="INSTALACION DE IMPRESORA">INSTALACION DE IMPRESORA</option>
-                                                        <option value="INSTALACION DE MONITOR">INSTALACION DE MONITOR</option>
-                                                        <option value="INSTALACION DE REGULADOR">INSTALACION DE REGULADOR</option>
-                                                        <option value="INSTALACIÓN DE SISTEMA OPERATIVO CON CARACTERISTICAS PARA SERVIDOR CON SUS APLICACIONES BASICAS">INSTALACIÓN DE SISTEMA OPERATIVO CON CARACTERISTICAS PARA SERVIDOR CON SUS APLICACIONES BASICAS</option>
-                                                        <option value="INSTALACIÓN DE SISTEMA OPERATIVO CON SUS APLICACIONES DE OFIMATICA">INSTALACIÓN DE SISTEMA OPERATIVO CON SUS APLICACIONES DE OFIMATICA</option>
-                                                        <option value="INSTALACION DISCO DURO">INSTALACION DISCO DURO</option>
-                                                        <option value="INSTALACION FUENTE DE PODER">INSTALACION FUENTE DE PODER</option>
-                                                        <option value="INSTALACION MEMORIA RAM">INSTALACION MEMORIA RAM</option>
-                                                        <option value="INSTALACION TARJETA DE RED ALAMBRICA">INSTALACION TARJETA DE RED ALAMBRICA</option>
-                                                        <option value="INSTALACION TARJETA DE RED INALAMBRICA">INSTALACION TARJETA DE RED INALAMBRICA</option>
-                                                        <option value="INSTALACION DE EQUIPOS DE COMPUTACION">INSTALACION DE EQUIPOS DE COMPUTACION</option>
-                                                        <option value="HABILITAR ACCESO A FORMATO EN EXCEL">HABILITAR ACCESO A FORMATO EN EXCEL</option>
-                                                        <option value="ASIGNACIÓN DE GRUPO DE TRABAJO EN DIRECTORIO ACTIVO">ASIGNACIÓN DE GRUPO DE TRABAJO EN DIRECTORIO ACTIVO</option>
-                                                        <option value="INSTALACION TARJETA DE VIDEO">INSTALACION TARJETA DE VIDEO</option>
-                                                        <option value="INSTALACION UNIDAD DE DVD">INSTALACION UNIDAD OF DVD</option>
-                                                        <option value="MANTENIMIENTO 'LIMPIEZA INTERNA' DEL COMPUTADOR">MANTENIMIENTO "LIMPIEZA INTERNA" DEL COMPUTADOR</option>
-                                                        <option value="MANTENIMIENTO / ACTUALIZACIÓN INTERNO DE BASE DE DATOS GISA">MANTENIMIENTO / ACTUALIZACIÓN INTERNO DE BASE DE DATOS GISA</option>
-                                                        <option value="MANTENIMIENTO DE SERVIDORES">MANTENIMIENTO DE SERVIDORES</option>
-                                                        <option value="MANTENIMIENTO INTERNO DE FORMATO DE CONTROL OF IMPRESIONES">MANTENIMIENTO INTERNO DE FORMATO DE CONTROL OF IMPRESIONES</option>
-                                                        <option value="MANTENIMIENTO INTERNO DE BASE DE DATOS INTRADAR">MANTENIMIENTO INTERNO DE BASE DE DATOS INTRADAR</option>
-                                                        <option value="MANTENIMIENTO INTERNO DE BASE DE DATOS PROMANAGER">MANTENIMIENTO INTERNO DE BASE DE DATOS PROMANAGER</option>
-                                                        <option value="MANTENIMIENTO O REFRESCAMIENTO DE USUARIO">MANTENIMIENTO O REFRESCAMIENTO DE USUARIO</option>
-                                                        <option value="MOVIMIENTO DE EQUIPOS">MOVIMIENTO DE EQUIPOS</option>
-                                                        <option value="PREPARACION DE INFORMACION PARA LA DIRECCION (DESPACHO)">PREPARACION DE INFORMACION PARA LA DIRECCION (DESPACHO)</option>
-                                                        <option value="PREPARACION DE INFORMACION PARA LA ODI">PREPARACION DE INFORMACION PARA LA ODI</option>
-                                                        <option value="REALIZACION DE INFORME">REALIZACION DE INFORME</option>
-                                                        <option value="RECUPERACION DE INFORMACION PERDIDA O BORRADA ACCIDENTALMENTE">RECUPERACION DE INFORMACION PERDIDA O BORRADA ACCIDENTALMENTE</option>
-                                                        <option value="REINCORPORACION DE EQUIPO DE COMPUTACION A RED MAGISTRATURA">REINCORPORACION DE EQUIPO DE COMPUTACION A RED MAGISTRATURA</option>
-                                                        <option value="REPARACION CABLEADO TELEFONICO">REPARACION CABLEADO TELEFONICO</option>
-                                                        <option value="REPARACION DE CABLEADO DE RED">REPARACION DE CABLEADO DE RED</option>
-                                                        <option value="REPARACION DE CAFETERA">REPARACION DE CAFETERA</option>
-                                                        <option value="REPARACION DE EXTENSION TELEFONICA">REPARACION DE EXTENSION TELEFONICA</option>
-                                                        <option value="REPARACION DE LAPTOP">REPARACION DE LAPTOP</option>
-                                                        <option value="REPORTE DE AVERIAS TELEFONICAS DEM">REPORTE DE AVERIAS TELEFONICAS DEM</option>
-                                                        <option value="RESPALDO DE BASES DE DATOS">RESPALDO DE BASES DE DATOS</option>
-                                                        <option value="RESPALDO DE INFORMACION DE AUDIENCIAS">RESPALDO DE INFORMACION DE AUDIENCIAS</option>
-                                                        <option value="RESPALDO DE SERVIDORES">RESPALDO DE SERVIDORES</option>
-                                                        <option value="RESPALDO Y INSTALACIÓN DE SISTEMA OPERATIVO CON SUS APLICACIONES BASICAS OFIMATICA Y ANTIVIRUS">RESPALDO Y INSTALACIÓN DE SISTEMA OPERATIVO CON SUS APLICACIONES BASICAS OFIMATICA Y ANTIVIRUS</option>
-                                                        <option value="RESPALDOS CD / DVD">RESPALDOS CD / DVD</option>
-                                                        <option value="RESTABLECIMIENTO DE CONTRASEÑA DE INTERNET">RESTABLECIMIENTO DE CONTRASEÑA DE INTERNET</option>
-                                                        <option value="RESTABLECIMIENTO DE CONTRASEÑA DE PAGINA TSJ">RESTABLECIMIENTO DE CONTRASEÑA DE PAGINA TSJ</option>
-                                                        <option value="RESTABLECIMIENTO DE CONTRASEÑA PARA INGRESAR A LA RED MAGISTRATURA">RESTABLECIMIENTO DE CONTRASEÑA PARA INGRESAR A LA RED MAGISTRATURA</option>
-                                                        <option value="REESTRUCTURACION DE CABLEADO Y PUNTOS DE RED">REESTRUCTURACION DE CABLEADO Y PUNTOS DE RED</option>
-                                                        <option value="REVISION DE CABLEADO DE RED">REVISION DE CABLEADO DE RED</option>
-                                                        <option value="REVISION DE COMPUTADOR">REVISION DE COMPUTADOR</option>
-                                                        <option value="REVISION DE FUNCIONALIDAD DE IMPRESORA">REVISION DE FUNCIONALIDAD DE IMPRESORA</option>
-                                                        <option value="REVISION DE MONITORES">REVISION DE MONITORES</option>
-                                                        <option value="REVISION DE MOUSE">REVISION DE MOUSE</option>
-                                                        <option value="REVISION DE SERVIDOR">REVISION DE SERVIDOR</option>
-                                                        <option value="REVISION DE TECLADO">REVISION DE TECLADO</option>
-                                                        <option value="REVISION EDITOR DE SENTENCIAS">REVISION EDITOR DE SENTENCIAS</option>
-                                                        <option value="SISTEMAS JUDICIALES">SISTEMAS JUDICIALES</option>
-                                                        <option value="SMART SENSOR">SMART SENSOR</option>
-                                                        <option value="SOLICITUDES OF ACCESO INTERNET">SOLICITUDES OF ACCESO INTERNET</option>
-                                                        <option value="SOPORTE AL USUARIO">SOPORTE AL USUARIO</option>
-                                                        <option value="SOPORTE DE RED INALAMBRICA">SOPORTE DE RED INALAMBRICA</option>
-                                                        <option value="SOPORTE DE SOFTWARE">SOPORTE DE SOFTWARE</option>
-                                                        <option value="TAREAS ADMINISTRATIVAS">TAREAS ADMINISTRATIVAS</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Por favor seleccione el trabajo realizado</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="dependencia" class="form-label required-field">Dependencia</label>
-                                                    <select class="form-select" id="dependencia" required>
-                                                        <option value="">Seleccione una dependencia</option>
-                                                        <option value="BIENES PUBLICOS - DAR MERIDA">BIENES PUBLICOS - DAR MERIDA</option>
-                                                        <option value="CESTA TICKET - DAR MERIDA">CESTA TICKET - DAR MERIDA</option>
-                                                        <option value="CIRCUITO JUDICIAL DE PROTECCION DE NIÑOS, NIÑAS Y ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">CIRCUITO JUDICIAL DE PROTECCION DE NIÑOS, NIÑAS Y ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA</option>
-                                                        <option value="CIRCUITO JUDICIAL DE PROTECCIÓN DEL NIÑO, NIÑA Y ADOLESCENTE DEL ESTADO MÉRIDA, SEDE EL VIGÍA">CIRCUITO JUDICIAL DE PROTECCIÓN DEL NIÑO, NIÑA Y ADOLESCENTE DEL ESTADO MÉRIDA, SEDE EL VIGÍA</option>
-                                                        <option value="CIRCUITO JUDICIAL LABORAL DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">CIRCUITO JUDICIAL LABORAL DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="CIRCUITO JUDICIAL PENAL SECCION ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">CIRCUITO JUDICIAL PENAL SECCION ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="CIRCUITO JUDICIAL PENAL SECCION ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA. EXT VIGÍA">CIRCUITO JUDICIAL PENAL SECCION ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA. EXT VIGÍA</option>
-                                                        <option value="DAR MERIDA">DAR MERIDA</option>
-                                                        <option value="DIRECCION ADMINISTRATIVA REGIONAL DEL ESTADO BOLIVARIANO DE MERIDA">DIRECCION ADMINISTRATIVA REGIONAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="FASDEM Y BIENESTAR SOCIAL -DAR MERIDA">FASDEM Y BIENESTAR SOCIAL -DAR MERIDA</option>
-                                                        <option value="FINANZAS - DAR MERIDA">FINANZAS - DAR MERIDA</option>
-                                                        <option value="INFORMATICA - DAR MERIDA">INFORMATICA - DAR MERIDA</option>
-                                                        <option value="INSPECTORIA GENERAL DE LOS TRIBUNALES">INSPECTORIA GENERAL DE LOS TRIBUNALES</option>
-                                                        <option value="JUZGADO PRIMERO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO PRIMERO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="JUZGADO SUPERIOR AGRARIO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO SUPERIOR AGRARIO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="JUZGADO SUPERIOR PRIMERO CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO SUPERIOR PRIMERO CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="JUZGADO SUPERIOR SEGUNDO CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO SUPERIOR SEGUNDO CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="JUZGADO TERCERO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO TERCERO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="OFICINA DE RECTORÍA">OFICINA DE RECTORÍA</option>
-                                                        <option value="PARTICIPACION CIUDADANA - DAR MERIDA">PARTICIPACION CIUDADANA - DAR MERIDA</option>
-                                                        <option value="PERSONAL - RECLUTAMIENTO - DAR MERIDA">PERSONAL - RECLUTAMIENTO - DAR MERIDA</option>
-                                                        <option value="SALA DE AUDIENCIAS - DAR MERIDA">SALA DE AUDIENCIAS - DAR MERIDA</option>
-                                                        <option value="SISTEMA DE SEGURIDAD ELECTRONICA (SISEEL)">SISTEMA DE SEGURIDAD ELECTRONICA (SISEEL)</option>
-                                                        <option value="TRIBUNAL CUARTO DE MUNICIPIO ORDINARIO Y EJECUTOR DE MEDIDAS DE LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">TRIBUNAL CUARTO DE MUNICIPIO ORDINARIO Y EJECUTOR DE MEDIDAS DE LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="TRIBUNAL TERCERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA">TRIBUNAL TERCERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="OCII - DAR MERIDA">OCII - DAR MERIDA</option>
-                                                        <option value="CIRCUITO JUDICIAL PENAL CON COMPETENCIA EN MATERIA DE DELITO DE VIOLENCIA CONTRA LA MUJER DEL ESTADO MERIDA">CIRCUITO JUDICIAL PENAL CON COMPETENCIA EN MATERIA DE DELITO DE VIOLENCIA CONTRA LA MUJER DEL ESTADO MERIDA</option>
-                                                        <option value="JUZGADO SEGUNDO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO SEGUNDO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="PROVEEDURIA - DAR MERIDA">PROVEEDURIA - DAR MERIDA</option>
-                                                        <option value="SERVICIOS JUDICIALES - DAR MERIDA">SERVICIOS JUDICIALES - DAR MERIDA</option>
-                                                        <option value="NOMINA - DAR MERIDA">NOMINA - DAR MERIDA</option>
-                                                        <option value="ORGE">ORGE</option>
-                                                        <option value="RECEPCCION - DAR MERIDA">RECEPCCION - DAR MERIDA</option>
-                                                        <option value="SECRETARIA - DAR MERIDA">SECRETARIA - DAR MERIDA</option>
-                                                        <option value="DEFENSA PUBLICA">DEFENSA PUBLICA</option>
-                                                        <option value="TRIBUNAL SEGUNDO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS CAMPO ELIAS Y ARICAGUA">TRIBUNAL SEGUNDO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS CAMPO ELIAS Y ARICAGUA</option>
-                                                        <option value="TRIBUNAL PRIMERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS CAMPO ELIAS Y ARICAGUA">TRIBUNAL PRIMERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS CAMPO ELIAS Y ARICAGUA</option>
-                                                        <option value="TRIBUNAL PRIMERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA">TRIBUNAL PRIMERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
-                                                        <option value="OFICINA DE JEFE DE PERSONAL - DAR MERIDA">OFICINA DE JEFE DE PERSONAL - DAR MERIDA</option>
-                                                        <option value="INFRAESTRUCTURA - DAR MERIDA">INFRAESTRUCTURA - DAR MERIDA</option>
-                                                        <option value="SERVICIOS MÉDICOS">SERVICIOS MÉDICOS</option>
-                                                        <option value="OFICINA DE SEGURIDAD DE LA DAR">OFICINA DE SEGURIDAD DE LA DAR</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Por favor seleccione la dependencia</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="fecha" class="form-label required-field">Fecha</label>
-                                                    <input type="date" class="form-control" id="fecha" required>
-                                                    <div class="invalid-feedback">Por favor seleccione una fecha</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="detalleTrabajo" class="form-label required-field">Detalle del Trabajo</label>
-                                                    <textarea class="form-control" id="detalleTrabajo" rows="3" required></textarea>
-                                                    <div class="invalid-feedback">Por favor ingrese el detalle del trabajo</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="solicitud" class="form-label required-field">Cómo fue la Solicitud</label>
-                                                    <select class="form-select" id="solicitud" required>
-                                                        <option value="">Seleccione una opción</option>
-                                                        <option value="Presencial">Presencial</option>
-                                                        <option value="Telefónica">Telefónica</option>
-                                                        <option value="Correo">Correo Electrónico</option>
-                                                        <option value="Sistema">Sistema</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Por favor seleccione cómo fue la solicitud</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="oati" class="form-label required-field">OATI Responsable del Trabajo</label>
-                                                    <input type="text" class="form-control" id="oati" required>
-                                                    <div class="invalid-feedback">Por favor ingrese el responsable OATI</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="status" class="form-label required-field">Status</label>
-                                                    <select class="form-select" id="status" required>
-                                                        <option value="">Seleccione el status</option>
-                                                        <option value="Completado">Completado</option>
-                                                        <option value="En Proceso">En Proceso</option>
-                                                        <option value="Pendiente">Pendiente</option>
-                                                        <option value="Cancelado">Cancelado</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Por favor seleccione el status</div>
-                                                </div>
-                                            </div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <span><i class="fas fa-plus-circle me-2"></i>Nuevo Registro de Actividad</span>
+                        <span class="feature-badge">Sistema Local</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="activityForm">
+                            <input type="hidden" id="editId" value="">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-section">
+                                        <h5><i class="fas fa-tasks me-2"></i>Información de la Actividad</h5>
+                                        
+                                        <div class="mb-3">
+                                            <label for="categoria" class="form-label required-field">Categoría</label>
+                                            <select class="form-select" id="categoria" required>
+                                                <option value="">Seleccione una categoría</option>
+                                                <option value="Mantenimiento">Mantenimiento</option>
+                                                <option value="Reparación">Reparación</option>
+                                                <option value="Instalación">Instalación</option>
+                                                <option value="Soporte">Soporte Técnico</option>
+                                                <option value="Otro">Otro</option>
+                                            </select>
                                         </div>
                                         
-                                        <div class="col-md-6">
-                                            <div class="form-section">
-                                                <h5><i class="fas fa-desktop me-2"></i>Información del Equipo</h5>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="fechaCierre" class="form-label">Fecha de Cierre</label>
-                                                    <input type="date" class="form-control" id="fechaCierre">
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="operatividad" class="form-label required-field">Operatividad del Equipo</label>
-                                                    <select class="form-select" id="operatividad" required>
-                                                        <option value="">Seleccione una opción</option>
-                                                        <option value="Operativo">Operativo</option>
-                                                        <option value="No Operativo">No Operativo</option>
-                                                        <option value="En Reparación">En Reparación</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Por favor seleccione la operatividad</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="tipoEquipo" class="form-label required-field">Tipo de Equipo</label>
-                                                    <select class="form-select" id="tipoEquipo" required>
-                                                        <option value="">Seleccione un tipo</option>
-                                                        <option value="Computadora">Computadora</option>
-                                                        <option value="Impresora">Impresora</option>
-                                                        <option value="Scanner">Scanner</option>
-                                                        <option value="Servidor">Servidor</option>
-                                                        <option value="Red">Equipo de Red</option>
-                                                        <option value="Otro">Otro</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Por favor seleccione el tipo de equipo</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="marca" class="form-label required-field">Marca</label>
-                                                    <select class="form-select" id="marca" required>
-                                                        <option value="">Seleccione una marca</option>
-                                                        <option value="ARKTEK">ARKTEK</option>
-                                                        <option value="BOSCH">BOSCH</option>
-                                                        <option value="CANON">CANON</option>
-                                                        <option value="CARTUCHO 49">CARTUCHO 49</option>
-                                                        <option value="CLON">CLON</option>
-                                                        <option value="DELL">DELL</option>
-                                                        <option value="ERICSSON">ERICSSON</option>
-                                                        <option value="FORZA">FORZA</option>
-                                                        <option value="GENERICA">GENERICA</option>
-                                                        <option value="GENIUS">GENIUS</option>
-                                                        <option value="HP">HP</option>
-                                                        <option value="IBM">IBM</option>
-                                                        <option value="INTER POWER">INTER POWER</option>
-                                                        <option value="LANPRO">LANPRO</option>
-                                                        <option value="LENOVO">LENOVO</option>
-                                                        <option value="LG">LG</option>
-                                                        <option value="NO APLICA">NO APLICA</option>
-                                                        <option value="PANASONIC">PANASONIC</option>
-                                                        <option value="SAMSUNG">SAMSUNG</option>
-                                                        <option value="SIEMENS">SIEMENS</option>
-                                                        <option value="SKIL">SKIL</option>
-                                                        <option value="SMART SENSOR">SMART SENSOR</option>
-                                                        <option value="SONEVIEW">SONEVIEW</option>
-                                                        <option value="VARIOS">VARIOS</option>
-                                                        <option value="VIT">VIT</option>
-                                                        <option value="ZUH IPOING">ZUH IPOING</option>
-                                                        <option value="ZUHI POINT">ZUHI POINT</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Por favor seleccione la marca</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="modelo" class="form-label required-field">Modelo</label>
-                                                    <select class="form-select" id="modelo" required>
-                                                        <option value="">Seleccione un modelo</option>
-                                                        <option value="1577-E6S">1577-E6S</option>
-                                                        <option value="2413-01">2413-01</option>
-                                                        <option value="3105MW">3105MW</option>
-                                                        <option value="3300U">3300U</option>
-                                                        <option value="6636-AC1">6636-AC1</option>
-                                                        <option value="6792+B5:B61">6792+B5:B61</option>
-                                                        <option value="8171-NBS">8171-NBS</option>
-                                                        <option value="8183-DFS">8183-DFS</option>
-                                                        <option value="8306-KRS">8306-KRS</option>
-                                                        <option value="9482-bw8">9482-bw8</option>
-                                                        <option value="9632-CA4">9632-CA4</option>
-                                                        <option value="9632-F95">9632-F95</option>
-                                                        <option value="ACCU 6000">ACCU 6000</option>
-                                                        <option value="BIONAIRE">BIONAIRE</option>
-                                                        <option value="DC5700">DC5700</option>
-                                                        <option value="DOK-K5313">DOK-K5313</option>
-                                                        <option value="E1210-01">E1210-01</option>
-                                                        <option value="E2220-01">E2220-01</option>
-                                                        <option value="E2220-03">E2220-03</option>
-                                                        <option value="E2230-03">E2230-03</option>
-                                                        <option value="E2710">E2710</option>
-                                                        <option value="EUROSET 8055">EUROSET 8055</option>
-                                                        <option value="F6W15A">F6W15A</option>
-                                                        <option value="FVR1211B">FVR1211B</option>
-                                                        <option value="G3010">G3010</option>
-                                                        <option value="G41">G41</option>
-                                                        <option value="H170-1">H170-1</option>
-                                                        <option value="HP 3003 DW">HP 3003 DW</option>
-                                                        <option value="HP 4003DW">HP 4003DW</option>
-                                                        <option value="HP 4250">HP 4250</option>
-                                                        <option value="HP LASERJET P2035">HP LASERJET P2035</option>
-                                                        <option value="HP3003">HP3003</option>
-                                                        <option value="HP-49A">HP-49A</option>
-                                                        <option value="HP-G3010">HP-G3010</option>
-                                                        <option value="IR3025">IR3025</option>
-                                                        <option value="IR3225">IR3225</option>
-                                                        <option value="K639">K639</option>
-                                                        <option value="KB0225">KB0225</option>
-                                                        <option value="KX-TG3510LAB">KX-TG3510LAB</option>
-                                                        <option value="LASER JET PRO M102W">LASER JET PRO M102W</option>
-                                                        <option value="LASET JET 107A">LASET JET 107A</option>
-                                                        <option value="LJM101">LJM101</option>
-                                                        <option value="LP5AI">LP5AI</option>
-                                                        <option value="LPJ2-23">LPJ2-23</option>
-                                                        <option value="M106">M106</option>
-                                                        <option value="M2100-01-01">M2100-01-01</option>
-                                                        <option value="M2400">M2400</option>
-                                                        <option value="M2420">M2420</option>
-                                                        <option value="M426">M426</option>
-                                                        <option value="M55E">M55E</option>
-                                                        <option value="M600">M600</option>
-                                                        <option value="M696">M696</option>
-                                                        <option value="MTM818848S">MTM818848S</option>
-                                                        <option value="NO APLICA">NO APLICA</option>
-                                                        <option value="OPTIPLEX 7010">OPTIPLEX 7010</option>
-                                                        <option value="P1300">P1300</option>
-                                                        <option value="P2015">P2015</option>
-                                                        <option value="P2413">P2413</option>
-                                                        <option value="P3005">P3005</option>
-                                                        <option value="PCR-600">PCR-600</option>
-                                                        <option value="SIN MODELO">SIN MODELO</option>
-                                                        <option value="SKIL 9003 700W 115ML">SKIL 9003 700W 115ML</option>
-                                                        <option value="SR954">SR954</option>
-                                                        <option value="ST1020M4-02">ST1020M4-02</option>
-                                                        <option value="SUPER HOBBY 400w 3/8´´">SUPER HOBBY 400w 3/8´´</option>
-                                                        <option value="V1N1058">V1N1058</option>
-                                                        <option value="VARIOS">VARIOS</option>
-                                                        <option value="VIT M2400">VIT M2400</option>
-                                                        <option value="9704">9704</option>
-                                                        <option value="MFP452DW">MFP452DW</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Por favor seleccione el modelo</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="serial" class="form-label required-field">Serial</label>
-                                                    <input type="text" class="form-control" id="serial" required>
-                                                    <div class="invalid-feedback">Por favor ingrese el serial</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="nroBien" class="form-label required-field">Nro Bien</label>
-                                                    <input type="text" class="form-control" id="nroBien" required>
-                                                    <div class="invalid-feedback">Por favor ingrese el número de bien</div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="observaciones" class="form-label">Observaciones</label>
-                                                    <textarea class="form-control" id="observaciones" rows="3"></textarea>
-                                                </div>
-                                            </div>
+                                        <div class="mb-3">
+                                            <label for="trabajoRealizado" class="form-label required-field">Trabajo Realizado</label>
+                                            <textarea class="form-control" id="trabajoRealizado" rows="3" required placeholder="Describa el trabajo realizado..."></textarea>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="dependencia" class="form-label required-field">Dependencia</label>
+                                            <input type="text" class="form-control" id="dependencia" required placeholder="Ej: Sistemas, Contabilidad, etc.">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="fecha" class="form-label required-field">Fecha</label>
+                                            <input type="date" class="form-control" id="fecha" required>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="detalleTrabajo" class="form-label required-field">Detalle del Trabajo</label>
+                                            <textarea class="form-control" id="detalleTrabajo" rows="3" required placeholder="Describa en detalle el trabajo ejecutado..."></textarea>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="solicitud" class="form-label required-field">Cómo fue la Solicitud</label>
+                                            <select class="form-select" id="solicitud" required>
+                                                <option value="">Seleccione una opción</option>
+                                                <option value="Presencial">Presencial</option>
+                                                <option value="Telefónica">Telefónica</option>
+                                                <option value="Correo">Correo Electrónico</option>
+                                                <option value="Sistema">Sistema</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="oati" class="form-label required-field">OATI Responsable del Trabajo</label>
+                                            <input type="text" class="form-control" id="oati" required placeholder="Nombre del técnico responsable">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label required-field">Status</label>
+                                            <select class="form-select" id="status" required>
+                                                <option value="">Seleccione el status</option>
+                                                <option value="Completado">Completado</option>
+                                                <option value="En Proceso">En Proceso</option>
+                                                <option value="Pendiente">Pendiente</option>
+                                                <option value="Cancelado">Cancelado</option>
+                                            </select>
                                         </div>
                                     </div>
-                                    
-                                    <div class="d-grid gap-2 mt-3">
-                                        <button type="submit" class="btn btn-primary btn-lg" id="submitButton">
-                                            <i class="fas fa-save me-2"></i>Guardar Actividad
-                                        </button>
-                                        <button type="button" class="btn btn-secondary btn-lg" id="cancelEditButton" style="display: none;">
-                                            <i class="fas fa-times me-2"></i>Cancelar Edición
-                                        </button>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-section">
+                                        <h5><i class="fas fa-desktop me-2"></i>Información del Equipo</h5>
+                                        
+                                        <div class="mb-3">
+                                            <label for="fechaCierre" class="form-label">Fecha de Cierre</label>
+                                            <input type="date" class="form-control" id="fechaCierre">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="operatividad" class="form-label required-field">Operatividad del Equipo</label>
+                                            <select class="form-select" id="operatividad" required>
+                                                <option value="">Seleccione una opción</option>
+                                                <option value="Operativo">Operativo</option>
+                                                <option value="No Operativo">No Operativo</option>
+                                                <option value="En Reparación">En Reparación</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="tipoEquipo" class="form-label required-field">Tipo de Equipo</label>
+                                            <select class="form-select" id="tipoEquipo" required>
+                                                <option value="">Seleccione un tipo</option>
+                                                <option value="Computadora">Computadora</option>
+                                                <option value="Impresora">Impresora</option>
+                                                <option value="Scanner">Scanner</option>
+                                                <option value="Servidor">Servidor</option>
+                                                <option value="Red">Equipo de Red</option>
+                                                <option value="Otro">Otro</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="marca" class="form-label required-field">Marca</label>
+                                            <input type="text" class="form-control" id="marca" required placeholder="Ej: HP, Dell, Lenovo, etc.">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="modelo" class="form-label required-field">Modelo</label>
+                                            <input type="text" class="form-control" id="modelo" required placeholder="Ej: EliteDesk 800, OptiPlex 3070, etc.">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="serial" class="form-label required-field">Serial</label>
+                                            <input type="text" class="form-control" id="serial" required placeholder="Número de serie del equipo">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="nroBien" class="form-label required-field">Nro Bien</label>
+                                            <input type="text" class="form-control" id="nroBien" required placeholder="Número de inventario">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="toner" class="form-label">Toner (Gramos)</label>
+                                            <input type="number" class="form-control" id="toner" min="0" step="1" placeholder="Cantidad en gramos">
+                                        </div>
                                     </div>
-                                </form>
+                                </div>
                             </div>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitButton">
+                                    <i class="fas fa-save me-2"></i>Guardar Actividad
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-lg" id="cancelEditButton" style="display: none;">
+                                    <i class="fas fa-times me-2"></i>Cancelar Edición
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="stats-box fade-in">
+                    <h4><i class="fas fa-chart-bar me-2"></i>Resumen de Actividades</h4>
+                    <div class="stats-number" id="totalActivities">0</div>
+                    <p>Actividades registradas</p>
+                </div>
+                
+                <div class="stats-box fade-in">
+                    <h4><i class="fas fa-check-circle me-2"></i>Estado Actual</h4>
+                    <div class="stats-number" id="completedActivities">0</div>
+                    <p>Completadas</p>
+                </div>
+                
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <i class="fas fa-history me-2"></i>Últimas Actividades
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group" id="recentActivities">
+                            <div class="list-group-item text-center">No hay actividades recientes</div>
                         </div>
                     </div>
-                    
-                    <div class="col-md-4">
-                        <div class="stats-box">
-                            <h4>Resumen de Actividades</h4>
-                            <div class="stats-number" id="totalActivities">0</div>
-                            <p>Actividades registradas</p>
-                        </div>
-                        
-                        <div class="stats-box">
-                            <h4>Estado Actual</h4>
-                            <div class="stats-number" id="completedActivities">0</div>
-                            <p>Completadas</p>
-                            <div class="progress">
-                                <div id="completedProgress" class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                <div class="storage-info fade-in">
+                    <h5><i class="fas fa-database me-2"></i>Información de Almacenamiento</h5>
+                    <p>Los datos se guardan localmente en tu navegador.</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm" id="exportData">
+                            <i class="fas fa-download me-1"></i>Exportar Datos
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" id="importData">
+                            <i class="fas fa-upload me-1"></i>Importar Datos
+                        </button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                        <button class="btn btn-outline-warning btn-sm" id="clearData">
+                            <i class="fas fa-trash me-1"></i>Limpiar Datos
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sync-options fade-in">
+                    <h5><i class="fas fa-sync me-2"></i>Sincronización Manual</h5>
+                    <p>Para usar en múltiples dispositivos:</p>
+                    <ol>
+                        <li>Exporta los datos desde el dispositivo actual</li>
+                        <li>Guarda el archivo JSON</li>
+                        <li>Importa el archivo en el otro dispositivo</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="export-options fade-in">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-file-export me-2"></i>Opciones de Exportación</h5>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-danger" id="exportSelectedPdf">
+                                    <i class="fas fa-file-pdf me-1"></i>Exportar Seleccionados (PDF)
+                                </button>
+                                <button class="btn btn-danger" id="exportAllPdf">
+                                    <i class="fas fa-file-pdf me-1"></i>Exportar Todos (PDF)
+                                </button>
+                                <button class="btn btn-success" id="exportSelectedExcel">
+                                    <i class="fas fa-file-excel me-1"></i>Exportar Seleccionados (Excel)
+                                </button>
+                                <button class="btn btn-success" id="exportAllExcel">
+                                    <i class="fas fa-file-excel me-1"></i>Exportar Todos (Excel)
+                                </button>
                             </div>
                         </div>
-                        
-                        <div class="card">
-                            <div class="card-header">
-                                <i class="fas fa-history me-2"></i>Últimas Actividades
-                            </div>
-                            <div class="card-body">
-                                <div class="list-group" id="recentActivities">
-                                    <div class="list-group-item text-center">No hay actividades recientes</div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-end h-100">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Buscar..." id="searchInput">
+                                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                                        <i class="fas fa-search"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="storage-info">
-                            <h5><i class="fas fa-database me-2"></i>Información de Almacenamiento</h5>
-                            <p>Los datos se guardan localmente en tu navegador usando localStorage.</p>
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-outline-primary btn-sm" id="exportData">
-                                    <i class="fas fa-download me-1"></i>Exportar Datos
-                                </button>
-                                <button class="btn btn-outline-info btn-sm" id="importData">
-                                    <i class="fas fa-upload me-1"></i>Importar Datos
-                                </button>
-                                <button class="btn btn-outline-warning btn-sm" id="clearData">
-                                    <i class="fas fa-trash me-1"></i>Limpiar Datos
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="storage-info mt-3">
-                            <h5><i class="fas fa-info-circle me-2"></i>¿Qué es el Almacenamiento Local?</h5>
-                            <p>El almacenamiento local (localStorage) permite guardar datos en el navegador web de forma persistente, incluso después de cerrar el navegador.</p>
-                            <button class="btn btn-sm btn-outline-secondary" id="storageDetailsBtn">
-                                <i class="fas fa-chart-pie me-1"></i>Ver detalles de almacenamiento
-                            </button>
-                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="tab-pane fade" id="activities" role="tabpanel" aria-labelledby="activities-tab">
-                <!-- Contenido de la pestaña de actividades -->
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>Esta sección muestra todas las actividades registradas en el sistema.
-                </div>
-            </div>
-
-            <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
-                <!-- Contenido de la pestaña de estadísticas -->
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>Esta sección muestra estadísticas y gráficos sobre las actividades registradas.
+                
+                <div class="card fade-in">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-table me-2"></i>Registro de Actividades</span>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="selectAll">
+                            <label class="form-check-label" for="selectAll">
+                                Seleccionar todos
+                            </label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover activity-table">
+                                <thead>
+                                    <tr>
+                                        <th class="checkbox-cell"></th>
+                                        <th>Fecha</th>
+                                        <th>Categoría</th>
+                                        <th>Dependencia</th>
+                                        <th>Trabajo Realizado</th>
+                                        <th>OATI</th>
+                                        <th>Status</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activitiesTable">
+                                    <tr>
+                                        <td colspan="8" class="text-center">No hay actividades registradas</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Indicador de estado de almacenamiento -->
-    <div id="connectionStatus" class="connection-status online" data-bs-toggle="tooltip" data-bs-placement="left" title="Haz clic para ver detalles de almacenamiento">
-        <i class="fas fa-database me-1"></i> Almacenamiento Local
-    </div>
-
-    <!-- Modal para detalles de almacenamiento -->
-    <div class="modal fade" id="storageModal" tabindex="-1" aria-labelledby="storageModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content storage-modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="storageModalLabel"><i class="fas fa-database me-2"></i>Estado del Almacenamiento</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Modal para Vista Previa -->
+    <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewModalLabel">Detalles de la Actividad - OATI</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary rounded-circle p-3 me-3">
-                            <i class="fas fa-database fa-2x text-white"></i>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">Almacenamiento Local</h5>
-                            <p class="text-muted mb-0">Datos guardados en tu navegador</p>
-                        </div>
-                    </div>
-
-                    <div class="storage-details">
-                        <h6>Uso de almacenamiento</h6>
-                        <div class="progress storage-progress">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 35%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <div class="storage-stats">
-                            <div class="stat-item">
-                                <div class="text-primary fw-bold">35%</div>
-                                <small>En uso</small>
-                            </div>
-                            <div class="stat-item">
-                                <div class="text-secondary fw-bold">65%</div>
-                                <small>Disponible</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="storage-details">
-                        <h6>Información técnica</h6>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Tecnología
-                                <span class="badge bg-primary rounded-pill">localStorage</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Límite de almacenamiento
-                                <span class="text-end">5-10 MB<br><small class="text-muted">dependiendo del navegador</small></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Persistencia
-                                <span class="badge bg-success rounded-pill">Datos persistentes</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="alert alert-info mt-3">
-                        <h6><i class="fas fa-info-circle me-1"></i>¿Cómo funcionan los datos?</h6>
-                        <p class="mb-0">Tus datos se guardan localmente en este dispositivo. Para acceder a ellos desde otro dispositivo, exporta los datos y luego impórtalos en el otro dispositivo.</p>
-                    </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Contenido dinámico -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" id="manageStorageBtn">
-                        <i class="fas fa-cog me-1"></i>Gestionar almacenamiento
+                    <button type="button" class="btn btn-danger" id="exportSinglePdf">
+                        <i class="fas fa-file-pdf me-1"></i>Exportar a PDF
+                    </button>
+                    <button type="button" class="btn btn-success" id="exportSingleExcel">
+                        <i class="fas fa-file-excel me-1"></i>Exportar a Excel
                     </button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="connectionStatus" class="connection-status online">
+        <i class="fas fa-database me-1"></i> Almacenamiento Local
     </div>
 
     <footer class="bg-dark text-white text-center py-3 mt-5">
@@ -824,86 +616,668 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Inicializar tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
-
+        // Inicializar jsPDF
+        window.jsPDF = window.jspdf.jsPDF;
+        
+        // Almacenamiento de actividades
+        let activities = JSON.parse(localStorage.getItem('activities')) || [];
+        let currentEditId = null;
+        let currentViewId = null;
+        
         // Elementos del DOM
+        const activityForm = document.getElementById('activityForm');
+        const activitiesTable = document.getElementById('activitiesTable');
+        const recentActivities = document.getElementById('recentActivities');
+        const totalActivities = document.getElementById('totalActivities');
+        const completedActivities = document.getElementById('completedActivities');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const submitButton = document.getElementById('submitButton');
+        const cancelEditButton = document.getElementById('cancelEditButton');
+        const editIdField = document.getElementById('editId');
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const exportSelectedPdfButton = document.getElementById('exportSelectedPdf');
+        const exportAllPdfButton = document.getElementById('exportAllPdf');
+        const exportSelectedExcelButton = document.getElementById('exportSelectedExcel');
+        const exportAllExcelButton = document.getElementById('exportAllExcel');
+        const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+        const modalBody = document.getElementById('modalBody');
+        const exportSinglePdfButton = document.getElementById('exportSinglePdf');
+        const exportSingleExcelButton = document.getElementById('exportSingleExcel');
+        const exportDataButton = document.getElementById('exportData');
+        const importDataButton = document.getElementById('importData');
+        const importFileInput = document.getElementById('importFile');
+        const clearDataButton = document.getElementById('clearData');
         const connectionStatus = document.getElementById('connectionStatus');
-        const storageDetailsBtn = document.getElementById('storageDetailsBtn');
-        const storageModal = new bootstrap.Modal(document.getElementById('storageModal'));
-        const manageStorageBtn = document.getElementById('manageStorageBtn');
-
-        // Comprobar disponibilidad de localStorage
-        function checkLocalStorage() {
-            try {
-                const test = 'test';
-                localStorage.setItem(test, test);
-                localStorage.removeItem(test);
-                return true;
-            } catch(e) {
-                return false;
-            }
-        }
-
-        // Actualizar estado de almacenamiento
-        function updateStorageStatus() {
-            const isAvailable = checkLocalStorage();
-            
-            if (isAvailable) {
-                connectionStatus.className = 'connection-status online';
-                connectionStatus.innerHTML = '<i class="fas fa-database me-1"></i> Almacenamiento Local';
-                connectionStatus.setAttribute('data-bs-original-title', 'Almacenamiento local disponible. Haz clic para ver detalles.');
-            } else {
-                connectionStatus.className = 'connection-status offline';
-                connectionStatus.innerHTML = '<i class="fas fa-database me-1"></i> Almacenamiento No Disponible';
-                connectionStatus.setAttribute('data-bs-original-title', 'El almacenamiento local no está disponible en este navegador.');
-            }
-            
-            // Actualizar tooltip
-            const tooltip = bootstrap.Tooltip.getInstance(connectionStatus);
-            if (tooltip) {
-                tooltip.hide();
-                tooltip.dispose();
-            }
-            new bootstrap.Tooltip(connectionStatus);
-        }
-
-        // Mostrar detalles de almacenamiento
-        connectionStatus.addEventListener('click', function() {
-            storageModal.show();
-        });
-
-        storageDetailsBtn.addEventListener('click', function() {
-            storageModal.show();
-        });
-
-        manageStorageBtn.addEventListener('click', function() {
-            alert('Aquí se abriría la gestión avanzada de almacenamiento. En un sistema real, esto permitiría ver y gestionar todos los datos almacenados.');
-        });
-
-        // Inicializar la aplicación
-        updateStorageStatus();
-
-        // Simular funcionalidad de botones
-        document.getElementById('exportData').addEventListener('click', function() {
-            alert('Función de exportación: Se descargaría un archivo JSON con todos los datos.');
-        });
-
-        document.getElementById('importData').addEventListener('click', function() {
-            alert('Función de importación: Se abriría un selector de archivos para importar datos desde un JSON.');
-        });
-
-        document.getElementById('clearData').addEventListener('click', function() {
-            if (confirm('¿Está seguro de que desea eliminar TODOS los datos locales? Esta acción no se puede deshacer.')) {
-                alert('Todos los datos locales han sido eliminados. En un sistema real, se borraría el localStorage.');
-            }
-        });
-
+        
         // Establecer fecha actual por defecto
         document.getElementById('fecha').valueAsDate = new Date();
+        
+        // Guardar actividad
+        activityForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const activity = {
+                categoria: document.getElementById('categoria').value,
+                trabajoRealizado: document.getElementById('trabajoRealizado').value,
+                dependencia: document.getElementById('dependencia').value,
+                fecha: document.getElementById('fecha').value,
+                detalleTrabajo: document.getElementById('detalleTrabajo').value,
+                solicitud: document.getElementById('solicitud').value,
+                oati: document.getElementById('oati').value,
+                status: document.getElementById('status').value,
+                fechaCierre: document.getElementById('fechaCierre').value,
+                operatividad: document.getElementById('operatividad').value,
+                tipoEquipo: document.getElementById('tipoEquipo').value,
+                marca: document.getElementById('marca').value,
+                modelo: document.getElementById('modelo').value,
+                serial: document.getElementById('serial').value,
+                nroBien: document.getElementById('nroBien').value,
+                toner: document.getElementById('toner').value,
+                id: currentEditId || Date.now() // ID único basado en timestamp
+            };
+            
+            if (currentEditId) {
+                // Editar actividad existente
+                const index = activities.findIndex(a => a.id === currentEditId);
+                if (index !== -1) {
+                    activities[index] = activity;
+                }
+                cancelEdit();
+            } else {
+                // Nueva actividad
+                activities.push(activity);
+            }
+            
+            saveActivities();
+            renderActivities();
+            activityForm.reset();
+            document.getElementById('fecha').valueAsDate = new Date();
+            
+            showNotification(`Actividad ${currentEditId ? 'actualizada' : 'registrada'} con éxito!`, 'success');
+        });
+        
+        // Cancelar edición
+        cancelEditButton.addEventListener('click', cancelEdit);
+        
+        function cancelEdit() {
+            currentEditId = null;
+            editIdField.value = '';
+            submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Guardar Actividad';
+            cancelEditButton.style.display = 'none';
+            activityForm.reset();
+            document.getElementById('fecha').valueAsDate = new Date();
+        }
+        
+        // Guardar actividades en localStorage
+        function saveActivities() {
+            localStorage.setItem('activities', JSON.stringify(activities));
+            updateStats();
+        }
+        
+        // Renderizar actividades en la tabla
+        function renderActivities() {
+            if (activities.length === 0) {
+                activitiesTable.innerHTML = '<tr><td colspan="8" class="text-center">No hay actividades registradas</td></tr>';
+                recentActivities.innerHTML = '<div class="list-group-item text-center">No hay actividades recientes</div>';
+                return;
+            }
+            
+            // Ordenar actividades por fecha (más recientes primero)
+            const sortedActivities = [...activities].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            // Renderizar tabla principal
+            activitiesTable.innerHTML = '';
+            sortedActivities.forEach(activity => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="checkbox-cell">
+                        <input class="form-check-input activity-checkbox" type="checkbox" value="${activity.id}">
+                    </td>
+                    <td>${formatDate(activity.fecha)}</td>
+                    <td>${activity.categoria}</td>
+                    <td>${activity.dependencia}</td>
+                    <td>${activity.trabajoRealizado.substring(0, 50)}${activity.trabajoRealizado.length > 50 ? '...' : ''}</td>
+                    <td>${activity.oati}</td>
+                    <td><span class="badge ${getStatusBadgeClass(activity.status)}">${activity.status}</span></td>
+                    <td class="action-buttons">
+                        <button class="btn btn-sm btn-info view-btn" data-id="${activity.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning edit-btn" data-id="${activity.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="${activity.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger pdf-btn" data-id="${activity.id}">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                    </td>
+                `;
+                activitiesTable.appendChild(tr);
+            });
+            
+            // Renderizar actividades recientes
+            renderRecentActivities(sortedActivities.slice(0, 5));
+            
+            // Añadir event listeners a los botones
+            addButtonListeners();
+            
+            // Añadir event listener a los checkboxes
+            addCheckboxListeners();
+        }
+        
+        // Renderizar actividades recientes
+        function renderRecentActivities(activities) {
+            recentActivities.innerHTML = '';
+            
+            if (activities.length === 0) {
+                recentActivities.innerHTML = '<div class="list-group-item text-center">No hay actividades recientes</div>';
+                return;
+            }
+            
+            activities.forEach(activity => {
+                const div = document.createElement('div');
+                div.className = 'list-group-item';
+                div.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${activity.categoria}</h6>
+                        <small>${formatDate(activity.fecha)}</small>
+                    </div>
+                    <p class="mb-1">${activity.trabajoRealizado.substring(0, 60)}${activity.trabajoRealizado.length > 60 ? '...' : ''}</p>
+                    <small class="text-muted">${activity.dependencia} - ${activity.oati}</small>
+                `;
+                recentActivities.appendChild(div);
+            });
+        }
+        
+        // Añadir event listeners a los botones
+        function addButtonListeners() {
+            // Botones de ver
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    viewActivity(id);
+                });
+            });
+            
+            // Botones de editar
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    editActivity(id);
+                });
+            });
+            
+            // Botones de eliminar
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteActivity(id);
+                });
+            });
+            
+            // Botones de PDF individual
+            document.querySelectorAll('.pdf-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    exportToPdf(id);
+                });
+            });
+        }
+        
+        // Añadir event listeners a los checkboxes
+        function addCheckboxListeners() {
+            // Checkbox individuales
+            document.querySelectorAll('.activity-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateSelectAllCheckbox();
+                });
+            });
+            
+            // Checkbox "Seleccionar todos"
+            selectAllCheckbox.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.activity-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+            });
+        }
+        
+        // Actualizar el estado del checkbox "Seleccionar todos"
+        function updateSelectAllCheckbox() {
+            const checkboxes = document.querySelectorAll('.activity-checkbox');
+            const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(checkbox => checkbox.checked);
+            const someChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+            
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        }
+        
+        // Ver actividad
+        function viewActivity(id) {
+            const activity = activities.find(a => a.id === id);
+            if (activity) {
+                currentViewId = id;
+                
+                modalBody.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Información de la Actividad</h6>
+                            <p><strong>Categoría:</strong> ${activity.categoria}</p>
+                            <p><strong>Trabajo Realizado:</strong> ${activity.trabajoRealizado}</p>
+                            <p><strong>Dependencia:</strong> ${activity.dependencia}</p>
+                            <p><strong>Fecha:</strong> ${formatDate(activity.fecha)}</p>
+                            <p><strong>Detalle del Trabajo:</strong> ${activity.detalleTrabajo}</p>
+                            <p><strong>Solicitud:</strong> ${activity.solicitud}</p>
+                            <p><strong>OATI Responsable:</strong> ${activity.oati}</p>
+                            <p><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(activity.status)}">${activity.status}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Información del Equipo</h6>
+                            <p><strong>Fecha de Cierre:</strong> ${activity.fechaCierre ? formatDate(activity.fechaCierre) : 'N/A'}</p>
+                            <p><strong>Operatividad:</strong> ${activity.operatividad}</p>
+                            <p><strong>Tipo de Equipo:</strong> ${activity.tipoEquipo}</p>
+                            <p><strong>Marca:</strong> ${activity.marca}</p>
+                            <p><strong>Modelo:</strong> ${activity.modelo}</p>
+                            <p><strong>Serial:</strong> ${activity.serial}</p>
+                            <p><strong>Nro Bien:</strong> ${activity.nroBien}</p>
+                            <p><strong>Toner (Gramos):</strong> ${activity.toner || 'N/A'}</p>
+                        </div>
+                    </div>
+                `;
+                
+                viewModal.show();
+            }
+        }
+        
+        // Editar actividad
+        function editActivity(id) {
+            const activity = activities.find(a => a.id === id);
+            if (activity) {
+                currentEditId = id;
+                editIdField.value = id;
+                
+                // Llenar el formulario con los datos de la actividad
+                document.getElementById('categoria').value = activity.categoria;
+                document.getElementById('trabajoRealizado').value = activity.trabajoRealizado;
+                document.getElementById('dependencia').value = activity.dependencia;
+                document.getElementById('fecha').value = activity.fecha;
+                document.getElementById('detalleTrabajo').value = activity.detalleTrabajo;
+                document.getElementById('solicitud').value = activity.solicitud;
+                document.getElementById('oati').value = activity.oati;
+                document.getElementById('status').value = activity.status;
+                document.getElementById('fechaCierre').value = activity.fechaCierre;
+                document.getElementById('operatividad').value = activity.operatividad;
+                document.getElementById('tipoEquipo').value = activity.tipoEquipo;
+                document.getElementById('marca').value = activity.marca;
+                document.getElementById('modelo').value = activity.modelo;
+                document.getElementById('serial').value = activity.serial;
+                document.getElementById('nroBien').value = activity.nroBien;
+                document.getElementById('toner').value = activity.toner;
+                
+                // Cambiar el texto del botón
+                submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Actualizar Actividad';
+                cancelEditButton.style.display = 'block';
+                
+                // Scroll al formulario
+                document.getElementById('activityForm').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Eliminar actividad
+        function deleteActivity(id) {
+            if (confirm('¿Está seguro de que desea eliminar esta actividad?')) {
+                activities = activities.filter(a => a.id !== id);
+                saveActivities();
+                renderActivities();
+                showNotification('Actividad eliminada correctamente', 'success');
+            }
+        }
+        
+        // Exportar a PDF
+        function exportToPdf(id = null) {
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+            
+            let activitiesToExport = [];
+            
+            if (id) {
+                // Exportar una sola actividad
+                activitiesToExport = activities.filter(a => a.id === id);
+            } else {
+                // Exportar actividades seleccionadas o todas
+                const selectedIds = Array.from(document.querySelectorAll('.activity-checkbox:checked'))
+                    .map(checkbox => parseInt(checkbox.value));
+                
+                activitiesToExport = selectedIds.length > 0 
+                    ? activities.filter(a => selectedIds.includes(a.id))
+                    : activities;
+            }
+            
+            if (activitiesToExport.length === 0) {
+                showNotification('No hay actividades para exportar', 'warning');
+                return;
+            }
+            
+            // Agregar título y logo
+            doc.setFontSize(20);
+            doc.setTextColor(40, 40, 40);
+            doc.text('OATI - Oficina de Apoyo Técnico Informático', 15, 15);
+            doc.setFontSize(16);
+            doc.text('Reporte de Actividades', 15, 22);
+            doc.setFontSize(12);
+            doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 15, 29);
+            
+            // Preparar datos para la tabla
+            const tableData = activitiesToExport.map(activity => [
+                formatDate(activity.fecha),
+                activity.categoria,
+                activity.dependencia,
+                activity.trabajoRealizado.substring(0, 50) + (activity.trabajoRealizado.length > 50 ? '...' : ''),
+                activity.oati,
+                activity.status,
+                activity.tipoEquipo,
+                activity.marca,
+                activity.modelo
+            ]);
+            
+            // Crear tabla
+            doc.autoTable({
+                startY: 35,
+                head: [['Fecha', 'Categoría', 'Dependencia', 'Trabajo Realizado', 'OATI', 'Status', 'Tipo Equipo', 'Marca', 'Modelo']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [74, 101, 128],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [240, 240, 240]
+                },
+                margin: { top: 35 }
+            });
+            
+            // Guardar el PDF
+            doc.save('OATI_Reporte_Actividades.pdf');
+            showNotification('Reporte PDF exportado correctamente', 'success');
+        }
+        
+        // Exportar a Excel
+        function exportToExcel(id = null) {
+            let activitiesToExport = [];
+            
+            if (id) {
+                // Exportar una sola actividad
+                activitiesToExport = activities.filter(a => a.id === id);
+            } else {
+                // Exportar actividades seleccionadas o todas
+                const selectedIds = Array.from(document.querySelectorAll('.activity-checkbox:checked'))
+                    .map(checkbox => parseInt(checkbox.value));
+                
+                activitiesToExport = selectedIds.length > 0 
+                    ? activities.filter(a => selectedIds.includes(a.id))
+                    : activities;
+            }
+            
+            if (activitiesToExport.length === 0) {
+                showNotification('No hay actividades para exportar', 'warning');
+                return;
+            }
+            
+            // Preparar datos para Excel
+            const excelData = activitiesToExport.map(activity => ({
+                'Fecha': formatDate(activity.fecha),
+                'Categoría': activity.categoria,
+                'Dependencia': activity.dependencia,
+                'Trabajo Realizado': activity.trabajoRealizado,
+                'Detalle del Trabajo': activity.detalleTrabajo,
+                'Solicitud': activity.solicitud,
+                'OATI Responsable': activity.oati,
+                'Status': activity.status,
+                'Fecha de Cierre': activity.fechaCierre ? formatDate(activity.fechaCierre) : 'N/A',
+                'Operatividad': activity.operatividad,
+                'Tipo de Equipo': activity.tipoEquipo,
+                'Marca': activity.marca,
+                'Modelo': activity.modelo,
+                'Serial': activity.serial,
+                'Nro Bien': activity.nroBien,
+                'Toner (Gramos)': activity.toner || 'N/A'
+            }));
+            
+            // Crear hoja de trabajo
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            
+            // Ajustar el ancho de las columnas
+            const wscols = [
+                {wch: 10}, {wch: 15}, {wch: 20}, {wch: 40}, {wch: 40}, 
+                {wch: 15}, {wch: 20}, {wch: 12}, {wch: 12}, {wch: 15}, 
+                {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 10}, 
+                {wch: 12}
+            ];
+            ws['!cols'] = wscols;
+            
+            // Crear libro de trabajo
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Actividades OATI');
+            
+            // Guardar archivo
+            XLSX.writeFile(wb, 'OATI_Reporte_Actividades.xlsx');
+            showNotification('Reporte Excel exportado correctamente', 'success');
+        }
+        
+        // Exportar datos a JSON
+        function exportToJson() {
+            const dataStr = JSON.stringify(activities, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'actividades_oati.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('Datos exportados correctamente', 'success');
+        }
+        
+        // Importar datos desde JSON
+        function importFromJson(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const contents = e.target.result;
+                        const importedActivities = JSON.parse(contents);
+                        
+                        if (Array.isArray(importedActivities)) {
+                            if (confirm(`¿Importar ${importedActivities.length} actividades? Se reemplazarán los datos actuales.`)) {
+                                activities = importedActivities;
+                                saveActivities();
+                                renderActivities();
+                                showNotification('Datos importados correctamente', 'success');
+                            }
+                        } else {
+                            showNotification('El archivo no contiene datos válidos', 'error');
+                        }
+                    } catch (error) {
+                        showNotification('Error al importar el archivo: ' + error.message, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+        
+        // Limpiar todos los datos
+        function clearAllData() {
+            if (confirm('¿Está seguro de que desea eliminar TODOS los datos? Esta acción no se puede deshacer.')) {
+                activities = [];
+                saveActivities();
+                renderActivities();
+                showNotification('Todos los datos han sido eliminados', 'success');
+            }
+        }
+        
+        // Mostrar notificación
+        function showNotification(message, type = 'success') {
+            // Crear elemento de notificación
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show`;
+            notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Agregar al cuerpo
+            document.body.appendChild(notification);
+            
+            // Auto-eliminar después de 5 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+        
+        // Actualizar estadísticas
+        function updateStats() {
+            totalActivities.textContent = activities.length;
+            const completed = activities.filter(a => a.status === 'Completado').length;
+            completedActivities.textContent = completed;
+        }
+        
+        // Formatear fecha
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+        
+        // Obtener clase para el badge de status
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'Completado': return 'bg-success';
+                case 'En Proceso': return 'bg-primary';
+                case 'Pendiente': return 'bg-warning';
+                case 'Cancelado': return 'bg-danger';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        // Event listeners para exportación
+        exportSelectedPdfButton.addEventListener('click', () => exportToPdf());
+        exportAllPdfButton.addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('.activity-checkbox');
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+            updateSelectAllCheckbox();
+            exportToPdf();
+        });
+        
+        exportSelectedExcelButton.addEventListener('click', () => exportToExcel());
+        exportAllExcelButton.addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('.activity-checkbox');
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+            updateSelectAllCheckbox();
+            exportToExcel();
+        });
+        
+        exportSinglePdfButton.addEventListener('click', () => {
+            viewModal.hide();
+            exportToPdf(currentViewId);
+        });
+        
+        exportSingleExcelButton.addEventListener('click', () => {
+            viewModal.hide();
+            exportToExcel(currentViewId);
+        });
+        
+        // Event listeners para importar/exportar datos
+        exportDataButton.addEventListener('click', exportToJson);
+        importDataButton.addEventListener('click', () => importFileInput.click());
+        importFileInput.addEventListener('change', importFromJson);
+        clearDataButton.addEventListener('click', clearAllData);
+        
+        // Buscar actividades
+        searchButton.addEventListener('click', searchActivities);
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchActivities();
+            }
+        });
+        
+        function searchActivities() {
+            const searchText = searchInput.value.toLowerCase();
+            
+            if (!searchText) {
+                renderActivities();
+                return;
+            }
+            
+            const filteredActivities = activities.filter(activity => 
+                activity.categoria.toLowerCase().includes(searchText) ||
+                activity.trabajoRealizado.toLowerCase().includes(searchText) ||
+                activity.dependencia.toLowerCase().includes(searchText) ||
+                activity.detalleTrabajo.toLowerCase().includes(searchText) ||
+                activity.oati.toLowerCase().includes(searchText) ||
+                activity.status.toLowerCase().includes(searchText) ||
+                activity.tipoEquipo.toLowerCase().includes(searchText) ||
+                activity.marca.toLowerCase().includes(searchText) ||
+                activity.modelo.toLowerCase().includes(searchText)
+            );
+            
+            renderFilteredActivities(filteredActivities);
+        }
+        
+        function renderFilteredActivities(filteredActivities) {
+            if (filteredActivities.length === 0) {
+                activitiesTable.innerHTML = '<tr><td colspan="8" class="text-center">No se encontraron actividades</td></tr>';
+                return;
+            }
+            
+            activitiesTable.innerHTML = '';
+            filteredActivities.forEach(activity => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="checkbox-cell">
+                        <input class="form-check-input activity-checkbox" type="checkbox" value="${activity.id}">
+                    </td>
+                    <td>${formatDate(activity.fecha)}</td>
+                    <td>${activity.categoria}</td>
+                    <td>${activity.dependencia}</td>
+                    <td>${activity.trabajoRealizado.substring(0, 50)}${activity.trabajoRealizado.length > 50 ? '...' : ''}</td>
+                    <td>${activity.oati}</td>
+                    <td><span class="badge ${getStatusBadgeClass(activity.status)}">${activity.status}</span></td>
+                    <td class="action-buttons">
+                        <button class="btn btn-sm btn-info view-btn" data-id="${activity.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning edit-btn" data-id="${activity.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="${activity.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger pdf-btn" data-id="${activity.id}">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                    </td>
+                `;
+                activitiesTable.appendChild(tr);
+            });
+            
+            addButtonListeners();
+            addCheckboxListeners();
+        }
+        
+        // Inicializar la aplicación
+        renderActivities();
+        updateStats();
     </script>
 </body>
 </html>
