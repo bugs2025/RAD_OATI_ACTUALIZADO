@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OATI - Sistema de Registro de Actividades</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #4a6580;
+            --accent-color: #3498db;
+            --light-color: #f8f9fa;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #1a2530;
+        }
+        .btn-success {
+            background-color: var(--success-color);
+            border: none;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+        .activity-table {
+            font-size: 0.9rem;
+        }
+        .stats-box {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #e9ecef;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .stats-box:hover {
+            background-color: #dfe3e6;
+            transform: scale(1.02);
+        }
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .action-buttons {
+            white-space: nowrap;
+        }
+        .modal-content {
+            border-radius: 10px;
+        }
+        .modal-header {
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        .checkbox-cell {
+            width: 40px;
+        }
+        .export-options {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .oatilogo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .storage-info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .connection-status:hover {
+            transform: scale(1.05);
+        }
+        .online {
+            background-color: var(--success-color);
+            color: white;
+        }
+        .offline {
+            background-color: #6c757d;
+            color: white;
+        }
+        .sync-options {
+            background-color: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .feature-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+        .filter-section {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin-bottom: 20px;
+        }
+        .nav-tabs .nav-link {
+            color: var(--primary-color);
+        }
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--accent-color);
+        }
+        .progress {
+            height: 8px;
+            margin-bottom: 10px;
+        }
+        .storage-modal-content {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .storage-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .storage-progress {
+            height: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .storage-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 8px;
+            flex: 1;
+            margin: 0 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 768px) {
+            .action-buttons {
+                white-space: normal;
+            }
+            .action-buttons .btn {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container"></div>
+
+    <div class="header text-center">
+        <div class="oatilogo">
+            <i class="fas fa-laptop-code"></i>
+        </div>
+        <h1>OATI - Sistema de Registro de Actividades</h1>
+        <p class="lead">Oficina de Apoyo Técnico Informático</p>
+    </div>
+
+    <div class="container">
+        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="true">
+                    <i class="fas fa-plus-circle me-1"></i>Registrar Actividad
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities" type="button" role="tab" aria-controls="activities" aria-selected="false">
+                    <i class="fas fa-table me-1"></i>Actividades
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">
+                    <i class="fas fa-chart-bar me-1"></i>Estadísticas
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="mainTabsContent">
+            <div class="tab-pane fade show active" id="register" role="tabpanel" aria-labelledby="register-tab">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <span><i class="fas fa-plus-circle me-2"></i>Nuevo Registro de Actividad</span>
+                                <span class="feature-badge badge bg-success">Local</span>
+                            </div>
+                            <div class="card-body">
+                                <form id="activityForm">
+                                    <input type="hidden" id="editId" value="">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-section">
+                                                <h5><i class="fas fa-tasks me-2"></i>Información de la Actividad</h5>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="categoria" class="form-label required-field">Categoría</label>
+                                                    <select class="form-select" id="categoria" required>
+                                                        <option value="">Seleccione una categoría</option>
+                                                        <option value="Mantenimiento">Mantenimiento</option>
+                                                        <option value="Reparación">Reparación</option>
+                                                        <option value="Instalación">Instalación</option>
+                                                        <option value="Soporte">Soporte Técnico</option>
+                                                        <option value="Otro">Otro</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Por favor seleccione una categoría</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="trabajoRealizado" class="form-label required-field">Trabajo Realizado</label>
+                                                    <select class="form-select" id="trabajoRealizado" required>
+                                                        <option value="">Seleccione el trabajo realizado</option>
+                                                        <option value="ACTUALIZACIÓN DE ANTIVIRUS">ACTUALIZACIÓN DE ANTIVIRUS</option>
+                                                        <option value="ADECUACION DE APLICACIÓN, PARA EL ACCESO DEL FUNCIONARIO A LA MISMA">ADECUACION DE APLICACIÓN, PARA EL ACCESO DEL FUNCIONARIO A LA MISMA</option>
+                                                        <option value="ANALISIS DE COMPUTADOR CON DR. WEB ANTIVIRUS">ANALISIS DE COMPUTADOR CON DR. WEB ANTIVIRUS</option>
+                                                        <option value="ANALISIS DE COMPUTADOR CON KASPERSKY ANTIVIRUS">ANALISIS DE COMPUTADOR CON KASPERSKY ANTIVIRUS</option>
+                                                        <option value="ANALISIS DE DISCO DURO DE COMPUTADOR CON HDD REGENERADOR">ANALISIS DE DISCO DURO DE COMPUTADOR CON HDD REGENERADOR</option>
+                                                        <option value="ANALISIS DE DISCO DURO DE COMPUTADOR CON VICTORIA RESCUE">ANALISIS DE DISCO DURO DE COMPUTADOR CON VICTORIA RESCUE</option>
+                                                        <option value="CENTRAL TELEFONICA">CENTRAL TELEFONICA</option>
+                                                        <option value="CONFIGURACION DE FECHA Y HORA">CONFIGURACION DE FECHA Y HORA</option>
+                                                        <option value="CONFIGURACION DE SISTEMA GISA">CONFIGURACION DE SISTEMA GISA</option>
+                                                        <option value="CONFIGURACION DE TELEFONO PARA CONEXIÓN WIFI">CONFIGURACION DE TELEFONO PARA CONEXIÓN WIFI</option>
+                                                        <option value="CREACCION DE CARPETA COMPARTIDA">CREACCION DE CARPETA COMPARTIDA</option>
+                                                        <option value="CREACCION DE CUENTA PARA EN ACCESO AL SISTEMA DE BIENES PUBLICOS">CREACCION DE CUENTA PARA EN ACCESO AL SISTEMA DE BIENES PUBLICOS</option>
+                                                        <option value="CREACION DE CORREO ELECTRONICO">CREACION DE CORREO ELECTRONICO</option>
+                                                        <option value="CREACION DE CUENTA DE ACCESO A SISTEMA DE BIENES PUBLICOS">CREACION DE CUENTA DE ACCESO A SISTEMA DE BIENES PUBLICOS</option>
+                                                        <option value="CREACION DE CUENTA DE ACCESO A SISTEMA PROMANAGER">CREACION DE CUENTA DE ACCESO A SISTEMA PROMANAGER</option>
+                                                        <option value="CREACION DE CUENTA DE USUARIO DE LA RED MAGISTRATURA">CREACION DE CUENTA DE USUARIO DE LA RED MAGISTRATURA</option>
+                                                        <option value="CREACION EDITOR DE SENTENCIAS PAGINA TSJ">CREACION EDITOR DE SENTENCIAS PAGINA TSJ</option>
+                                                        <option value="DESBLOQUEO DE CUENTA DE USUARIO DE LA RED MAGISTRATURA">DESBLOQUEO DE CUENTA DE USUARIO DE LA RED MAGISTRATURA</option>
+                                                        <option value="DESCONEXION DE EQUIPO DE COMPUTACION DE LA RED MAGISTRATURA">DESCONEXION DE EQUIPO DE COMPUTACION DE LA RED MAGISTRATURA</option>
+                                                        <option value="DESHABILITAR CUENTA DE ACCESO A INTERNET">DESHABILITAR CUENTA DE ACCESO A INTERNET</option>
+                                                        <option value="DESHABILITAR CUENTA DE EDITOR DE TEXTO TSJ">DESHABILITAR CUENTA DE EDITOR DE TEXTO TSJ</option>
+                                                        <option value="DESHABILITAR CUENTA DE RED MAGISTRATURA">DESHABILitAR CUENTA DE RED MAGISTRATURA</option>
+                                                        <option value="ELABORACION DE PROYECTOS">ELABORACION DE PROYECTOS</option>
+                                                        <option value="EVENTOS / INSTALACION DE EQUIPOS AUDIOVISUALES">EVENTOS / INSTALACION DE EQUIPOS AUDIOVISUALES</option>
+                                                        <option value="FORMACION AL USUARIO">FORMACION AL USUARIO</option>
+                                                        <option value="HABILITAR ACCESO A CARPETA COMPARTIDA">HABILITAR ACCESO A CARPETA COMPARTIDA</option>
+                                                        <option value="HABILITAR CUENTA DE ACCESO A INTERNET">HABILITAR CUENTA DE ACCESO A INTERNET</option>
+                                                        <option value="HABILITAR CUENTA DE RED MAGISTRATURA">HABILITAR CUENTA DE RED MAGISTRATURA</option>
+                                                        <option value="HABILITAR CUENTAS DE USUARIO PARA EL ACCESO AL SISTEMA DE BIENES PUBLICOS">HABILITAR CUENTAS DE USUARIO PARA EL ACCESO AL SISTEMA DE BIENES PUBLICOS</option>
+                                                        <option value="HABILITAR USUARIO PARA EL ACCESO AL SISTEMA GISA REPORTES">HABILITAR USUARIO PARA EL ACCESO AL SISTEMA GISA REPORTES</option>
+                                                        <option value="INCORPORACION DE EQUIPO A MAGISTRATURA">INCORPORACION DE EQUIPO A MAGISTRATURA</option>
+                                                        <option value="INSTALACION BATERIA CR032">INSTALACION BATERIA CR032</option>
+                                                        <option value="INSTALACION CABLEADO DE RED">INSTALACION CABLEADO DE RED</option>
+                                                        <option value="INSTALACION CABLEADO TELEFONICO">INSTALACION CABLEADO TELEFONICO</option>
+                                                        <option value="INSTALACION CAMARA DE SEGURIDAD">INSTALACION CAMARA DE SEGURIDAD</option>
+                                                        <option value="INSTALACION DE ANTENAS INALAMBRICAS / ROUTER / INTERCONEXION DE SEDES">INSTALACION DE ANTENAS INALAMBRICAS / ROUTER / INTERCONEXION DE SEDES</option>
+                                                        <option value="INSTALACION DE APLICACIONES">INSTALACION DE APLICACIONES</option>
+                                                        <option value="INSTALACION DE CAMARAS DE SEGURIDAD">INSTALACION DE CAMARAS DE SEGURIDAD</option>
+                                                        <option value="INSTALACION DE CENTRAL TELEFONICA">INSTALACION DE CENTRAL TELEFONICA</option>
+                                                        <option value="INSTALACION DE ESCANER">INSTALACION DE ESCANER</option>
+                                                        <option value="INSTALACION DE IMPRESORA">INSTALACION DE IMPRESORA</option>
+                                                        <option value="INSTALACION DE MONITOR">INSTALACION DE MONITOR</option>
+                                                        <option value="INSTALACION DE REGULADOR">INSTALACION DE REGULADOR</option>
+                                                        <option value="INSTALACIÓN DE SISTEMA OPERATIVO CON CARACTERISTICAS PARA SERVIDOR CON SUS APLICACIONES BASICAS">INSTALACIÓN DE SISTEMA OPERATIVO CON CARACTERISTICAS PARA SERVIDOR CON SUS APLICACIONES BASICAS</option>
+                                                        <option value="INSTALACIÓN DE SISTEMA OPERATIVO CON SUS APLICACIONES DE OFIMATICA">INSTALACIÓN DE SISTEMA OPERATIVO CON SUS APLICACIONES DE OFIMATICA</option>
+                                                        <option value="INSTALACION DISCO DURO">INSTALACION DISCO DURO</option>
+                                                        <option value="INSTALACION FUENTE DE PODER">INSTALACION FUENTE DE PODER</option>
+                                                        <option value="INSTALACION MEMORIA RAM">INSTALACION MEMORIA RAM</option>
+                                                        <option value="INSTALACION TARJETA DE RED ALAMBRICA">INSTALACION TARJETA DE RED ALAMBRICA</option>
+                                                        <option value="INSTALACION TARJETA DE RED INALAMBRICA">INSTALACION TARJETA DE RED INALAMBRICA</option>
+                                                        <option value="INSTALACION DE EQUIPOS DE COMPUTACION">INSTALACION DE EQUIPOS DE COMPUTACION</option>
+                                                        <option value="HABILITAR ACCESO A FORMATO EN EXCEL">HABILITAR ACCESO A FORMATO EN EXCEL</option>
+                                                        <option value="ASIGNACIÓN DE GRUPO DE TRABAJO EN DIRECTORIO ACTIVO">ASIGNACIÓN DE GRUPO DE TRABAJO EN DIRECTORIO ACTIVO</option>
+                                                        <option value="INSTALACION TARJETA DE VIDEO">INSTALACION TARJETA DE VIDEO</option>
+                                                        <option value="INSTALACION UNIDAD DE DVD">INSTALACION UNIDAD OF DVD</option>
+                                                        <option value="MANTENIMIENTO 'LIMPIEZA INTERNA' DEL COMPUTADOR">MANTENIMIENTO "LIMPIEZA INTERNA" DEL COMPUTADOR</option>
+                                                        <option value="MANTENIMIENTO / ACTUALIZACIÓN INTERNO DE BASE DE DATOS GISA">MANTENIMIENTO / ACTUALIZACIÓN INTERNO DE BASE DE DATOS GISA</option>
+                                                        <option value="MANTENIMIENTO DE SERVIDORES">MANTENIMIENTO DE SERVIDORES</option>
+                                                        <option value="MANTENIMIENTO INTERNO DE FORMATO DE CONTROL OF IMPRESIONES">MANTENIMIENTO INTERNO DE FORMATO DE CONTROL OF IMPRESIONES</option>
+                                                        <option value="MANTENIMIENTO INTERNO DE BASE DE DATOS INTRADAR">MANTENIMIENTO INTERNO DE BASE DE DATOS INTRADAR</option>
+                                                        <option value="MANTENIMIENTO INTERNO DE BASE DE DATOS PROMANAGER">MANTENIMIENTO INTERNO DE BASE DE DATOS PROMANAGER</option>
+                                                        <option value="MANTENIMIENTO O REFRESCAMIENTO DE USUARIO">MANTENIMIENTO O REFRESCAMIENTO DE USUARIO</option>
+                                                        <option value="MOVIMIENTO DE EQUIPOS">MOVIMIENTO DE EQUIPOS</option>
+                                                        <option value="PREPARACION DE INFORMACION PARA LA DIRECCION (DESPACHO)">PREPARACION DE INFORMACION PARA LA DIRECCION (DESPACHO)</option>
+                                                        <option value="PREPARACION DE INFORMACION PARA LA ODI">PREPARACION DE INFORMACION PARA LA ODI</option>
+                                                        <option value="REALIZACION DE INFORME">REALIZACION DE INFORME</option>
+                                                        <option value="RECUPERACION DE INFORMACION PERDIDA O BORRADA ACCIDENTALMENTE">RECUPERACION DE INFORMACION PERDIDA O BORRADA ACCIDENTALMENTE</option>
+                                                        <option value="REINCORPORACION DE EQUIPO DE COMPUTACION A RED MAGISTRATURA">REINCORPORACION DE EQUIPO DE COMPUTACION A RED MAGISTRATURA</option>
+                                                        <option value="REPARACION CABLEADO TELEFONICO">REPARACION CABLEADO TELEFONICO</option>
+                                                        <option value="REPARACION DE CABLEADO DE RED">REPARACION DE CABLEADO DE RED</option>
+                                                        <option value="REPARACION DE CAFETERA">REPARACION DE CAFETERA</option>
+                                                        <option value="REPARACION DE EXTENSION TELEFONICA">REPARACION DE EXTENSION TELEFONICA</option>
+                                                        <option value="REPARACION DE LAPTOP">REPARACION DE LAPTOP</option>
+                                                        <option value="REPORTE DE AVERIAS TELEFONICAS DEM">REPORTE DE AVERIAS TELEFONICAS DEM</option>
+                                                        <option value="RESPALDO DE BASES DE DATOS">RESPALDO DE BASES DE DATOS</option>
+                                                        <option value="RESPALDO DE INFORMACION DE AUDIENCIAS">RESPALDO DE INFORMACION DE AUDIENCIAS</option>
+                                                        <option value="RESPALDO DE SERVIDORES">RESPALDO DE SERVIDORES</option>
+                                                        <option value="RESPALDO Y INSTALACIÓN DE SISTEMA OPERATIVO CON SUS APLICACIONES BASICAS OFIMATICA Y ANTIVIRUS">RESPALDO Y INSTALACIÓN DE SISTEMA OPERATIVO CON SUS APLICACIONES BASICAS OFIMATICA Y ANTIVIRUS</option>
+                                                        <option value="RESPALDOS CD / DVD">RESPALDOS CD / DVD</option>
+                                                        <option value="RESTABLECIMIENTO DE CONTRASEÑA DE INTERNET">RESTABLECIMIENTO DE CONTRASEÑA DE INTERNET</option>
+                                                        <option value="RESTABLECIMIENTO DE CONTRASEÑA DE PAGINA TSJ">RESTABLECIMIENTO DE CONTRASEÑA DE PAGINA TSJ</option>
+                                                        <option value="RESTABLECIMIENTO DE CONTRASEÑA PARA INGRESAR A LA RED MAGISTRATURA">RESTABLECIMIENTO DE CONTRASEÑA PARA INGRESAR A LA RED MAGISTRATURA</option>
+                                                        <option value="REESTRUCTURACION DE CABLEADO Y PUNTOS DE RED">REESTRUCTURACION DE CABLEADO Y PUNTOS DE RED</option>
+                                                        <option value="REVISION DE CABLEADO DE RED">REVISION DE CABLEADO DE RED</option>
+                                                        <option value="REVISION DE COMPUTADOR">REVISION DE COMPUTADOR</option>
+                                                        <option value="REVISION DE FUNCIONALIDAD DE IMPRESORA">REVISION DE FUNCIONALIDAD DE IMPRESORA</option>
+                                                        <option value="REVISION DE MONITORES">REVISION DE MONITORES</option>
+                                                        <option value="REVISION DE MOUSE">REVISION DE MOUSE</option>
+                                                        <option value="REVISION DE SERVIDOR">REVISION DE SERVIDOR</option>
+                                                        <option value="REVISION DE TECLADO">REVISION DE TECLADO</option>
+                                                        <option value="REVISION EDITOR DE SENTENCIAS">REVISION EDITOR DE SENTENCIAS</option>
+                                                        <option value="SISTEMAS JUDICIALES">SISTEMAS JUDICIALES</option>
+                                                        <option value="SMART SENSOR">SMART SENSOR</option>
+                                                        <option value="SOLICITUDES OF ACCESO INTERNET">SOLICITUDES OF ACCESO INTERNET</option>
+                                                        <option value="SOPORTE AL USUARIO">SOPORTE AL USUARIO</option>
+                                                        <option value="SOPORTE DE RED INALAMBRICA">SOPORTE DE RED INALAMBRICA</option>
+                                                        <option value="SOPORTE DE SOFTWARE">SOPORTE DE SOFTWARE</option>
+                                                        <option value="TAREAS ADMINISTRATIVAS">TAREAS ADMINISTRATIVAS</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Por favor seleccione el trabajo realizado</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="dependencia" class="form-label required-field">Dependencia</label>
+                                                    <select class="form-select" id="dependencia" required>
+                                                        <option value="">Seleccione una dependencia</option>
+                                                        <option value="BIENES PUBLICOS - DAR MERIDA">BIENES PUBLICOS - DAR MERIDA</option>
+                                                        <option value="CESTA TICKET - DAR MERIDA">CESTA TICKET - DAR MERIDA</option>
+                                                        <option value="CIRCUITO JUDICIAL DE PROTECCION DE NIÑOS, NIÑAS Y ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">CIRCUITO JUDICIAL DE PROTECCION DE NIÑOS, NIÑAS Y ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA</option>
+                                                        <option value="CIRCUITO JUDICIAL DE PROTECCIÓN DEL NIÑO, NIÑA Y ADOLESCENTE DEL ESTADO MÉRIDA, SEDE EL VIGÍA">CIRCUITO JUDICIAL DE PROTECCIÓN DEL NIÑO, NIÑA Y ADOLESCENTE DEL ESTADO MÉRIDA, SEDE EL VIGÍA</option>
+                                                        <option value="CIRCUITO JUDICIAL LABORAL DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">CIRCUITO JUDICIAL LABORAL DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="CIRCUITO JUDICIAL PENAL SECCION ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">CIRCUITO JUDICIAL PENAL SECCION ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="CIRCUITO JUDICIAL PENAL SECCION ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA. EXT VIGÍA">CIRCUITO JUDICIAL PENAL SECCION ADOLESCENTES DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA. EXT VIGÍA</option>
+                                                        <option value="DAR MERIDA">DAR MERIDA</option>
+                                                        <option value="DIRECCION ADMINISTRATIVA REGIONAL DEL ESTADO BOLIVARIANO DE MERIDA">DIRECCION ADMINISTRATIVA REGIONAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="FASDEM Y BIENESTAR SOCIAL -DAR MERIDA">FASDEM Y BIENESTAR SOCIAL -DAR MERIDA</option>
+                                                        <option value="FINANZAS - DAR MERIDA">FINANZAS - DAR MERIDA</option>
+                                                        <option value="INFORMATICA - DAR MERIDA">INFORMATICA - DAR MERIDA</option>
+                                                        <option value="INSPECTORIA GENERAL DE LOS TRIBUNALES">INSPECTORIA GENERAL DE LOS TRIBUNALES</option>
+                                                        <option value="JUZGADO PRIMERO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO PRIMERO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="JUZGADO SUPERIOR AGRARIO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO SUPERIOR AGRARIO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="JUZGADO SUPERIOR PRIMERO CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO SUPERIOR PRIMERO CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="JUZGADO SUPERIOR SEGUNDO CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO SUPERIOR SEGUNDO CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="JUZGADO TERCERO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO TERCERO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="OFICINA DE RECTORÍA">OFICINA DE RECTORÍA</option>
+                                                        <option value="PARTICIPACION CIUDADANA - DAR MERIDA">PARTICIPACION CIUDADANA - DAR MERIDA</option>
+                                                        <option value="PERSONAL - RECLUTAMIENTO - DAR MERIDA">PERSONAL - RECLUTAMIENTO - DAR MERIDA</option>
+                                                        <option value="SALA DE AUDIENCIAS - DAR MERIDA">SALA DE AUDIENCIAS - DAR MERIDA</option>
+                                                        <option value="SISTEMA DE SEGURIDAD ELECTRONICA (SISEEL)">SISTEMA DE SEGURIDAD ELECTRONICA (SISEEL)</option>
+                                                        <option value="TRIBUNAL CUARTO DE MUNICIPIO ORDINARIO Y EJECUTOR DE MEDIDAS DE LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">TRIBUNAL CUARTO DE MUNICIPIO ORDINARIO Y EJECUTOR DE MEDIDAS DE LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="TRIBUNAL TERCERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA">TRIBUNAL TERCERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="OCII - DAR MERIDA">OCII - DAR MERIDA</option>
+                                                        <option value="CIRCUITO JUDICIAL PENAL CON COMPETENCIA EN MATERIA DE DELITO DE VIOLENCIA CONTRA LA MUJER DEL ESTADO MERIDA">CIRCUITO JUDICIAL PENAL CON COMPETENCIA EN MATERIA DE DELITO DE VIOLENCIA CONTRA LA MUJER DEL ESTADO MERIDA</option>
+                                                        <option value="JUZGADO SEGUNDO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO DE MERIDA">JUZGADO SEGUNDO DE PRIMERA INSTANCIA CIVIL, MERCANTIL Y TRANSITO DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="PROVEEDURIA - DAR MERIDA">PROVEEDURIA - DAR MERIDA</option>
+                                                        <option value="SERVICIOS JUDICIALES - DAR MERIDA">SERVICIOS JUDICIALES - DAR MERIDA</option>
+                                                        <option value="NOMINA - DAR MERIDA">NOMINA - DAR MERIDA</option>
+                                                        <option value="ORGE">ORGE</option>
+                                                        <option value="RECEPCCION - DAR MERIDA">RECEPCCION - DAR MERIDA</option>
+                                                        <option value="SECRETARIA - DAR MERIDA">SECRETARIA - DAR MERIDA</option>
+                                                        <option value="DEFENSA PUBLICA">DEFENSA PUBLICA</option>
+                                                        <option value="TRIBUNAL SEGUNDO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS CAMPO ELIAS Y ARICAGUA">TRIBUNAL SEGUNDO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS CAMPO ELIAS Y ARICAGUA</option>
+                                                        <option value="TRIBUNAL PRIMERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS CAMPO ELIAS Y ARICAGUA">TRIBUNAL PRIMERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS CAMPO ELIAS Y ARICAGUA</option>
+                                                        <option value="TRIBUNAL PRIMERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA">TRIBUNAL PRIMERO OF MUNICIPIO ORDINARIO Y EJECUTOR OF MEDIDAS OF LOS MUNICIPIOS LIBERTADOR Y SANTOS MARQUINA DE LA CIRCUNSCRIPCION JUDICIAL DEL ESTADO BOLIVARIANO OF MERIDA</option>
+                                                        <option value="OFICINA DE JEFE DE PERSONAL - DAR MERIDA">OFICINA DE JEFE DE PERSONAL - DAR MERIDA</option>
+                                                        <option value="INFRAESTRUCTURA - DAR MERIDA">INFRAESTRUCTURA - DAR MERIDA</option>
+                                                        <option value="SERVICIOS MÉDICOS">SERVICIOS MÉDICOS</option>
+                                                        <option value="OFICINA DE SEGURIDAD DE LA DAR">OFICINA DE SEGURIDAD DE LA DAR</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Por favor seleccione la dependencia</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="fecha" class="form-label required-field">Fecha</label>
+                                                    <input type="date" class="form-control" id="fecha" required>
+                                                    <div class="invalid-feedback">Por favor seleccione una fecha</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="detalleTrabajo" class="form-label required-field">Detalle del Trabajo</label>
+                                                    <textarea class="form-control" id="detalleTrabajo" rows="3" required></textarea>
+                                                    <div class="invalid-feedback">Por favor ingrese el detalle del trabajo</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="solicitud" class="form-label required-field">Cómo fue la Solicitud</label>
+                                                    <select class="form-select" id="solicitud" required>
+                                                        <option value="">Seleccione una opción</option>
+                                                        <option value="Presencial">Presencial</option>
+                                                        <option value="Telefónica">Telefónica</option>
+                                                        <option value="Correo">Correo Electrónico</option>
+                                                        <option value="Sistema">Sistema</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Por favor seleccione cómo fue la solicitud</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="oati" class="form-label required-field">OATI Responsable del Trabajo</label>
+                                                    <input type="text" class="form-control" id="oati" required>
+                                                    <div class="invalid-feedback">Por favor ingrese el responsable OATI</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="status" class="form-label required-field">Status</label>
+                                                    <select class="form-select" id="status" required>
+                                                        <option value="">Seleccione el status</option>
+                                                        <option value="Completado">Completado</option>
+                                                        <option value="En Proceso">En Proceso</option>
+                                                        <option value="Pendiente">Pendiente</option>
+                                                        <option value="Cancelado">Cancelado</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Por favor seleccione el status</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-section">
+                                                <h5><i class="fas fa-desktop me-2"></i>Información del Equipo</h5>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="fechaCierre" class="form-label">Fecha de Cierre</label>
+                                                    <input type="date" class="form-control" id="fechaCierre">
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="operatividad" class="form-label required-field">Operatividad del Equipo</label>
+                                                    <select class="form-select" id="operatividad" required>
+                                                        <option value="">Seleccione una opción</option>
+                                                        <option value="Operativo">Operativo</option>
+                                                        <option value="No Operativo">No Operativo</option>
+                                                        <option value="En Reparación">En Reparación</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Por favor seleccione la operatividad</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="tipoEquipo" class="form-label required-field">Tipo de Equipo</label>
+                                                    <select class="form-select" id="tipoEquipo" required>
+                                                        <option value="">Seleccione un tipo</option>
+                                                        <option value="Computadora">Computadora</option>
+                                                        <option value="Impresora">Impresora</option>
+                                                        <option value="Scanner">Scanner</option>
+                                                        <option value="Servidor">Servidor</option>
+                                                        <option value="Red">Equipo de Red</option>
+                                                        <option value="Otro">Otro</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Por favor seleccione el tipo de equipo</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="marca" class="form-label required-field">Marca</label>
+                                                    <select class="form-select" id="marca" required>
+                                                        <option value="">Seleccione una marca</option>
+                                                        <option value="ARKTEK">ARKTEK</option>
+                                                        <option value="BOSCH">BOSCH</option>
+                                                        <option value="CANON">CANON</option>
+                                                        <option value="CARTUCHO 49">CARTUCHO 49</option>
+                                                        <option value="CLON">CLON</option>
+                                                        <option value="DELL">DELL</option>
+                                                        <option value="ERICSSON">ERICSSON</option>
+                                                        <option value="FORZA">FORZA</option>
+                                                        <option value="GENERICA">GENERICA</option>
+                                                        <option value="GENIUS">GENIUS</option>
+                                                        <option value="HP">HP</option>
+                                                        <option value="IBM">IBM</option>
+                                                        <option value="INTER POWER">INTER POWER</option>
+                                                        <option value="LANPRO">LANPRO</option>
+                                                        <option value="LENOVO">LENOVO</option>
+                                                        <option value="LG">LG</option>
+                                                        <option value="NO APLICA">NO APLICA</option>
+                                                        <option value="PANASONIC">PANASONIC</option>
+                                                        <option value="SAMSUNG">SAMSUNG</option>
+                                                        <option value="SIEMENS">SIEMENS</option>
+                                                        <option value="SKIL">SKIL</option>
+                                                        <option value="SMART SENSOR">SMART SENSOR</option>
+                                                        <option value="SONEVIEW">SONEVIEW</option>
+                                                        <option value="VARIOS">VARIOS</option>
+                                                        <option value="VIT">VIT</option>
+                                                        <option value="ZUH IPOING">ZUH IPOING</option>
+                                                        <option value="ZUHI POINT">ZUHI POINT</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Por favor seleccione la marca</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="modelo" class="form-label required-field">Modelo</label>
+                                                    <select class="form-select" id="modelo" required>
+                                                        <option value="">Seleccione un modelo</option>
+                                                        <option value="1577-E6S">1577-E6S</option>
+                                                        <option value="2413-01">2413-01</option>
+                                                        <option value="3105MW">3105MW</option>
+                                                        <option value="3300U">3300U</option>
+                                                        <option value="6636-AC1">6636-AC1</option>
+                                                        <option value="6792+B5:B61">6792+B5:B61</option>
+                                                        <option value="8171-NBS">8171-NBS</option>
+                                                        <option value="8183-DFS">8183-DFS</option>
+                                                        <option value="8306-KRS">8306-KRS</option>
+                                                        <option value="9482-bw8">9482-bw8</option>
+                                                        <option value="9632-CA4">9632-CA4</option>
+                                                        <option value="9632-F95">9632-F95</option>
+                                                        <option value="ACCU 6000">ACCU 6000</option>
+                                                        <option value="BIONAIRE">BIONAIRE</option>
+                                                        <option value="DC5700">DC5700</option>
+                                                        <option value="DOK-K5313">DOK-K5313</option>
+                                                        <option value="E1210-01">E1210-01</option>
+                                                        <option value="E2220-01">E2220-01</option>
+                                                        <option value="E2220-03">E2220-03</option>
+                                                        <option value="E2230-03">E2230-03</option>
+                                                        <option value="E2710">E2710</option>
+                                                        <option value="EUROSET 8055">EUROSET 8055</option>
+                                                        <option value="F6W15A">F6W15A</option>
+                                                        <option value="FVR1211B">FVR1211B</option>
+                                                        <option value="G3010">G3010</option>
+                                                        <option value="G41">G41</option>
+                                                        <option value="H170-1">H170-1</option>
+                                                        <option value="HP 3003 DW">HP 3003 DW</option>
+                                                        <option value="HP 4003DW">HP 4003DW</option>
+                                                        <option value="HP 4250">HP 4250</option>
+                                                        <option value="HP LASERJET P2035">HP LASERJET P2035</option>
+                                                        <option value="HP3003">HP3003</option>
+                                                        <option value="HP-49A">HP-49A</option>
+                                                        <option value="HP-G3010">HP-G3010</option>
+                                                        <option value="IR3025">IR3025</option>
+                                                        <option value="IR3225">IR3225</option>
+                                                        <option value="K639">K639</option>
+                                                        <option value="KB0225">KB0225</option>
+                                                        <option value="KX-TG3510LAB">KX-TG3510LAB</option>
+                                                        <option value="LASER JET PRO M102W">LASER JET PRO M102W</option>
+                                                        <option value="LASET JET 107A">LASET JET 107A</option>
+                                                        <option value="LJM101">LJM101</option>
+                                                        <option value="LP5AI">LP5AI</option>
+                                                        <option value="LPJ2-23">LPJ2-23</option>
+                                                        <option value="M106">M106</option>
+                                                        <option value="M2100-01-01">M2100-01-01</option>
+                                                        <option value="M2400">M2400</option>
+                                                        <option value="M2420">M2420</option>
+                                                        <option value="M426">M426</option>
+                                                        <option value="M55E">M55E</option>
+                                                        <option value="M600">M600</option>
+                                                        <option value="M696">M696</option>
+                                                        <option value="MTM818848S">MTM818848S</option>
+                                                        <option value="NO APLICA">NO APLICA</option>
+                                                        <option value="OPTIPLEX 7010">OPTIPLEX 7010</option>
+                                                        <option value="P1300">P1300</option>
+                                                        <option value="P2015">P2015</option>
+                                                        <option value="P2413">P2413</option>
+                                                        <option value="P3005">P3005</option>
+                                                        <option value="PCR-600">PCR-600</option>
+                                                        <option value="SIN MODELO">SIN MODELO</option>
+                                                        <option value="SKIL 9003 700W 115ML">SKIL 9003 700W 115ML</option>
+                                                        <option value="SR954">SR954</option>
+                                                        <option value="ST1020M4-02">ST1020M4-02</option>
+                                                        <option value="SUPER HOBBY 400w 3/8´´">SUPER HOBBY 400w 3/8´´</option>
+                                                        <option value="V1N1058">V1N1058</option>
+                                                        <option value="VARIOS">VARIOS</option>
+                                                        <option value="VIT M2400">VIT M2400</option>
+                                                        <option value="9704">9704</option>
+                                                        <option value="MFP452DW">MFP452DW</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Por favor seleccione el modelo</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="serial" class="form-label required-field">Serial</label>
+                                                    <input type="text" class="form-control" id="serial" required>
+                                                    <div class="invalid-feedback">Por favor ingrese el serial</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="nroBien" class="form-label required-field">Nro Bien</label>
+                                                    <input type="text" class="form-control" id="nroBien" required>
+                                                    <div class="invalid-feedback">Por favor ingrese el número de bien</div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="observaciones" class="form-label">Observaciones</label>
+                                                    <textarea class="form-control" id="observaciones" rows="3"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2 mt-3">
+                                        <button type="submit" class="btn btn-primary btn-lg" id="submitButton">
+                                            <i class="fas fa-save me-2"></i>Guardar Actividad
+                                        </button>
+                                        <button type="button" class="btn btn-secondary btn-lg" id="cancelEditButton" style="display: none;">
+                                            <i class="fas fa-times me-2"></i>Cancelar Edición
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="stats-box">
+                            <h4>Resumen de Actividades</h4>
+                            <div class="stats-number" id="totalActivities">0</div>
+                            <p>Actividades registradas</p>
+                        </div>
+                        
+                        <div class="stats-box">
+                            <h4>Estado Actual</h4>
+                            <div class="stats-number" id="completedActivities">0</div>
+                            <p>Completadas</p>
+                            <div class="progress">
+                                <div id="completedProgress" class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-history me-2"></i>Últimas Actividades
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group" id="recentActivities">
+                                    <div class="list-group-item text-center">No hay actividades recientes</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="storage-info">
+                            <h5><i class="fas fa-database me-2"></i>Información de Almacenamiento</h5>
+                            <p>Los datos se guardan localmente en tu navegador usando localStorage.</p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary btn-sm" id="exportData">
+                                    <i class="fas fa-download me-1"></i>Exportar Datos
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" id="importData">
+                                    <i class="fas fa-upload me-1"></i>Importar Datos
+                                </button>
+                                <button class="btn btn-outline-warning btn-sm" id="clearData">
+                                    <i class="fas fa-trash me-1"></i>Limpiar Datos
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="storage-info mt-3">
+                            <h5><i class="fas fa-info-circle me-2"></i>¿Qué es el Almacenamiento Local?</h5>
+                            <p>El almacenamiento local (localStorage) permite guardar datos en el navegador web de forma persistente, incluso después de cerrar el navegador.</p>
+                            <button class="btn btn-sm btn-outline-secondary" id="storageDetailsBtn">
+                                <i class="fas fa-chart-pie me-1"></i>Ver detalles de almacenamiento
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="activities" role="tabpanel" aria-labelledby="activities-tab">
+                <!-- Contenido de la pestaña de actividades -->
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Esta sección muestra todas las actividades registradas en el sistema.
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+                <!-- Contenido de la pestaña de estadísticas -->
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Esta sección muestra estadísticas y gráficos sobre las actividades registradas.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicador de estado de almacenamiento -->
+    <div id="connectionStatus" class="connection-status online" data-bs-toggle="tooltip" data-bs-placement="left" title="Haz clic para ver detalles de almacenamiento">
+        <i class="fas fa-database me-1"></i> Almacenamiento Local
+    </div>
+
+    <!-- Modal para detalles de almacenamiento -->
+    <div class="modal fade" id="storageModal" tabindex="-1" aria-labelledby="storageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content storage-modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="storageModalLabel"><i class="fas fa-database me-2"></i>Estado del Almacenamiento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle p-3 me-3">
+                            <i class="fas fa-database fa-2x text-white"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Almacenamiento Local</h5>
+                            <p class="text-muted mb-0">Datos guardados en tu navegador</p>
+                        </div>
+                    </div>
+
+                    <div class="storage-details">
+                        <h6>Uso de almacenamiento</h6>
+                        <div class="progress storage-progress">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 35%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="storage-stats">
+                            <div class="stat-item">
+                                <div class="text-primary fw-bold">35%</div>
+                                <small>En uso</small>
+                            </div>
+                            <div class="stat-item">
+                                <div class="text-secondary fw-bold">65%</div>
+                                <small>Disponible</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="storage-details">
+                        <h6>Información técnica</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Tecnología
+                                <span class="badge bg-primary rounded-pill">localStorage</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Límite de almacenamiento
+                                <span class="text-end">5-10 MB<br><small class="text-muted">dependiendo del navegador</small></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Persistencia
+                                <span class="badge bg-success rounded-pill">Datos persistentes</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <h6><i class="fas fa-info-circle me-1"></i>¿Cómo funcionan los datos?</h6>
+                        <p class="mb-0">Tus datos se guardan localmente en este dispositivo. Para acceder a ellos desde otro dispositivo, exporta los datos y luego impórtalos en el otro dispositivo.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="manageStorageBtn">
+                        <i class="fas fa-cog me-1"></i>Gestionar almacenamiento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p class="mb-0">OATI - Oficina de Apoyo Técnico Informático &copy; 2023</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inicializar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Elementos del DOM
+        const connectionStatus = document.getElementById('connectionStatus');
+        const storageDetailsBtn = document.getElementById('storageDetailsBtn');
+        const storageModal = new bootstrap.Modal(document.getElementById('storageModal'));
+        const manageStorageBtn = document.getElementById('manageStorageBtn');
+
+        // Comprobar disponibilidad de localStorage
+        function checkLocalStorage() {
+            try {
+                const test = 'test';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                return true;
+            } catch(e) {
+                return false;
+            }
+        }
+
+        // Actualizar estado de almacenamiento
+        function updateStorageStatus() {
+            const isAvailable = checkLocalStorage();
+            
+            if (isAvailable) {
+                connectionStatus.className = 'connection-status online';
+                connectionStatus.innerHTML = '<i class="fas fa-database me-1"></i> Almacenamiento Local';
+                connectionStatus.setAttribute('data-bs-original-title', 'Almacenamiento local disponible. Haz clic para ver detalles.');
+            } else {
+                connectionStatus.className = 'connection-status offline';
+                connectionStatus.innerHTML = '<i class="fas fa-database me-1"></i> Almacenamiento No Disponible';
+                connectionStatus.setAttribute('data-bs-original-title', 'El almacenamiento local no está disponible en este navegador.');
+            }
+            
+            // Actualizar tooltip
+            const tooltip = bootstrap.Tooltip.getInstance(connectionStatus);
+            if (tooltip) {
+                tooltip.hide();
+                tooltip.dispose();
+            }
+            new bootstrap.Tooltip(connectionStatus);
+        }
+
+        // Mostrar detalles de almacenamiento
+        connectionStatus.addEventListener('click', function() {
+            storageModal.show();
+        });
+
+        storageDetailsBtn.addEventListener('click', function() {
+            storageModal.show();
+        });
+
+        manageStorageBtn.addEventListener('click', function() {
+            alert('Aquí se abriría la gestión avanzada de almacenamiento. En un sistema real, esto permitiría ver y gestionar todos los datos almacenados.');
+        });
+
+        // Inicializar la aplicación
+        updateStorageStatus();
+
+        // Simular funcionalidad de botones
+        document.getElementById('exportData').addEventListener('click', function() {
+            alert('Función de exportación: Se descargaría un archivo JSON con todos los datos.');
+        });
+
+        document.getElementById('importData').addEventListener('click', function() {
+            alert('Función de importación: Se abriría un selector de archivos para importar datos desde un JSON.');
+        });
+
+        document.getElementById('clearData').addEventListener('click', function() {
+            if (confirm('¿Está seguro de que desea eliminar TODOS los datos locales? Esta acción no se puede deshacer.')) {
+                alert('Todos los datos locales han sido eliminados. En un sistema real, se borraría el localStorage.');
+            }
+        });
+
+        // Establecer fecha actual por defecto
+        document.getElementById('fecha').valueAsDate = new Date();
+    </script>
+</body>
+</html>
