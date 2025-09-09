@@ -1,39 +1,39 @@
 # RAD_OATI_ACTUALIZADO
 APP
-### Personalización
-Puedes modificar:
-- Colores y estilos en el CSS
-- Campos del formulario en el HTML
-- Lógica de negocio en el JavaScript
+# Sistema de Registro de Actividades OATI
 
-## 🤝 Contribuir
+Sistema web para la gestión y seguimiento de actividades diarias de la Oficina de Apoyo Técnico Informático.
 
-Si deseas contribuir al proyecto:
-1. Haz fork del repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+![Estado del Proyecto](https://img.shields.io/badge/Estado-🚀%20En%20Producción-brightgreen)
+![Licencia](https://img.shields.io/badge/Licencia-MIT-blue)
+![Versión](https://img.shields.io/badge/Versión-1.0.0-orange)
 
-## 📞 Soporte Técnico
+## ✨ Características Principales
 
-Si encuentras algún problema:
-1. Revisa la consola del navegador (F12) para errores
-2. Verifica que tengas JavaScript habilitado
-3. Asegúrate de usar un navegador compatible
+| Funcionalidad | Descripción | Estado |
+|---------------|-------------|---------|
+| 📝 Registro Completo | Captura todos los datos técnicos de actividades | ✅ Implementado |
+| 📊 Exportación PDF/Excel | Genera reportes en múltiples formatos | ✅ Implementado |
+| 💾 Almacenamiento Local | Datos persistentes en el navegador | ✅ Implementado |
+| 📱 Diseño Responsive | Funciona en desktop, tablet y móvil | ✅ Implementado |
+| 🔍 Búsqueda Avanzada | Filtra y encuentra actividades rápidamente | ✅ Implementado |
 
-**Problemas comunes**:
-- Los datos no persisten → Verificar que localStorage esté habilitado
-- No se descargan archivos → Verificar configuraciones de descarga del navegador
+## 🚀 Demo en Vivo
 
-## 📜 Licencia
+🔗 **URL del Sistema:** [https://tunombre.github.io/sistema-oati/](https://tunombre.github.io/sistema-oati/)
 
-Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detalles.
+## 📦 Instalación y Uso
 
-## 🏆 Créditos
+### Acceso Inmediato
+1. **Abre** el enlace de GitHub Pages
+2. **Comienza** a registrar actividades inmediatamente
+3. **Exporta** tus datos cuando necesites respaldos
 
-Desarrollado por bugs2025 para la Oficina de Apoyo Técnico Informático (OATI).
+### Uso Local
+```bash
+# Clona el repositorio
+git clone https://github.com/tunombre/sistema-oati.git
 
----
-
-**¿Necesitas ayuda?** Abre un [issue](https://github.com/bugs2025/sistema-oati/issues) en GitHub o contacta al administrador del sistema.
+# Abre el archivo principal
+open index.html
+# o simplemente haz doble clic en index.html
