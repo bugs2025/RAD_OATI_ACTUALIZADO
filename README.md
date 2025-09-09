@@ -20,7 +20,7 @@ Sistema web para la gestión y seguimiento de actividades diarias de la Oficina 
 
 ## 🚀 Demo en Vivo
 
-🔗 **URL del Sistema:** [https://tunombre.github.io/sistema-oati/](https://tunombre.github.io/sistema-oati/)
+🔗 **URL del Sistema:** [https://bugs2025.github.io/sistema-oati/](https://bugs2025.github.io/sistema-oati/)
 
 ## 📦 Instalación y Uso
 
