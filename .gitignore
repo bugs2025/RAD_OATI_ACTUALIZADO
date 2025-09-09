@@ -1,11 +1,27 @@
-# Archivos del sistema
+# Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Archivos de respaldo
+# Archivos de respaldo y temporales
 *.backup
 *.tmp
+*.log
+*.temp
 
-# Archivos de IDE
+# Archivos de entornos de desarrollo
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# Archivos de dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de sistema
+.env
+.env.local
+.env.production
